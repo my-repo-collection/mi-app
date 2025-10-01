@@ -2,46 +2,56 @@
 <html lang="es">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Registro</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSK - Bienvenid@</title>
     <link rel="stylesheet" href="style.css">
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js" defer></script>
 </head>
 
 <body>
-    <main class="page-center">
-        <div class="card container">
-            <h1 class="brand">Registro</h1>
-
-            <!-- REGISTRO -->
-            <form id="registerForm" class="form-box" autocomplete="on">
-                <label>Email</label>
-                <input id="registerEmail" type="email" placeholder="nombre@ejemplo.com" required>
-
-                <label>Contraseña</label>
-                <input id="registerPassword" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required>
-
-                <button id="registerBtn" class="btn">Crear cuenta</button>
-            </form>
-
-            <div id="msgBox" class="msgBox"></div>
+    <!-- NAVBAR -->
+    <nav class="navbar" role="navigation" aria-label="Principal">
+        <div class="container nav-content">
+            <a href="index.html" class="logo" aria-label="Ir a inicio">NSK</a>
+            <button class="nav-toggle" aria-label="Abrir menú">☰</button>
+            <ul class="nav-links">
+                <li><a href="index.html" aria-current="page">Inicio</a></li>
+                <li><a href="galeria.html">Galería</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="register.html">Registrarse</a></li>
+            </ul>
         </div>
+    </nav>
+
+    <!-- HERO -->
+    <header class="hero">
+        <div class="hero-text">
+            <h1>Explora. Comparte. Conecta.</h1>
+            <p>La comunidad visual donde tus imágenes cuentan historias.</p>
+            <a href="galeria.html" class="btn">Ver galería</a>
+        </div>
+    </header>
+
+    <!-- PREVIEW GALERÍA -->
+    <main class="container">
+        <h2 class="section-title">Últimas imágenes</h2>
+        <div id="galleryPreview" class="gallery-grid" aria-live="polite"></div>
     </main>
 
-    <!-- MODAL -->
-    <div id="successModal" class="modal">
-        <div class="modal-content">
-            <h2>¡Registro exitoso! 🎉</h2>
-            <p>Tu cuenta fue creada correctamente. Ahora puedes iniciar sesión.</p>
-            <button id="goLoginBtn" class="btn">Ir al login</button>
+    <!-- FOOTER -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <p>© 2025 NSK. Todos los derechos reservados.</p>
+            <nav aria-label="Enlaces legales">
+                <a href="#">Política de privacidad</a> |
+                <a href="#">Términos de uso</a>
+            </nav>
         </div>
-    </div>
+    </footer>
 
-    <script src="register.js"></script>
+    <script src="index.js"></script>
 </body>
 
 </html>

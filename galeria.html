@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSK - Galería</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js" defer></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="index.html" class="logo">NSK</a>
+            <button class="nav-toggle" aria-label="Abrir menú">☰</button>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="galeria.html" aria-current="page">Galería</a></li>
+                <li><a href="profile.html">Perfil</a></li>
+                <li><a href="login.html">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1>Galería pública</h1>
+        <label for="searchInput" class="sr-only">Buscar imágenes</label>
+        <input type="text" id="searchInput" placeholder="Buscar por tema o usuario..." class="search-bar">
+        <div id="galleryGrid" class="gallery-grid" aria-live="polite"></div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 NSK</p>
+        </div>
+    </footer>
+
+    <script src="galeria.js"></script>
+</body>
+
+</html>

@@ -1,25 +1,40 @@
-const SUPABASE_URL = "https://illwxhdyndqkfvvzbasr.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbHd4aGR5bmRxa2Z2dnpiYXNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MDE1OTMsImV4cCI6MjA3NDQ3NzU5M30.OJJ3TQgsdsCtIbv8DZZ7KZU2FJUjzh0FmeEWZ0Q_ZAs";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// login.js
+import { supabase } from "./config.js";
 
-const loginBtn = document.getElementById("loginBtn");
-const msgBox = document.getElementById("msgBox");
+document.addEventListener("DOMContentLoaded", () => {
+  const loginForm = document.getElementById("loginForm");
+  const loginBtn = document.getElementById("loginBtn");
+  const msgBox = document.getElementById("msgBox");
 
-function showMessage(msg,type="info"){
-  msgBox.textContent = msg;
-  msgBox.style.color = type==="error" ? "red" : "green";
-}
+  function showMessage(msg, type = "info") {
+    msgBox.textContent = msg;
+    msgBox.style.color = type === "error" ? "red" : (type === "success" ? "green" : "#333");
+  }
 
-loginBtn.addEventListener("click", async (ev)=>{
-  ev.preventDefault();
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if(error) throw error;
-    showMessage("Login correcto, redirigiendo...","success");
-    setTimeout(()=> window.location.href="profile.html", 1200);
-  } catch(err){
-    showMessage(err.message,"error");
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+
+      if (!email || !password) return showMessage("Completa los campos", "error");
+
+      loginBtn.disabled = true;
+      showMessage("Iniciando sesión...");
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        if (!data?.user) throw new Error("No se pudo iniciar sesión");
+
+        showMessage("Login correcto. Redirigiendo...", "success");
+        setTimeout(() => window.location.href = "profile.html", 800);
+      } catch (err) {
+        console.error(err);
+        showMessage(err.message, "error");
+      } finally {
+        loginBtn.disabled = false;
+      }
+    });
   }
 });

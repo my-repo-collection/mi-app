@@ -2,49 +2,74 @@
 <html lang="es">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Perfil</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - NSK</title>
     <link rel="stylesheet" href="style.css">
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js" defer></script>
 </head>
 
 <body>
-    <main class="page-center">
-        <div class="card container profile-card">
-            <header class="profile-header">
-                <h1>Mi perfil</h1>
-                <button id="logoutBtn" class="btn btn-danger">Cerrar sesión</button>
-            </header>
+    <!-- NAVBAR -->
+    <nav class="navbar" role="navigation" aria-label="Principal">
+        <div class="container nav-content">
+            <a href="index.html" class="logo">NSK</a>
+            <button class="nav-toggle" aria-label="Abrir menú">☰</button>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="galeria.html">Galería</a></li>
+                <li><a href="profile.html" aria-current="page">Perfil</a></li>
+                <li><button id="logoutBtn" class="btn btn-danger">Cerrar sesión</button></li>
+            </ul>
+        </div>
+    </nav>
 
-            <div class="profile-body">
-                <div class="avatar-column">
-                    <img id="avatarImg" src="https://via.placeholder.com/150" alt="Avatar" class="avatar">
-                    <div id="previewWrap" class="preview-wrap" style="display:none;">
-                        <small>Preview:</small>
-                        <img id="previewImg" src="" alt="Preview" class="avatar preview">
-                    </div>
-                </div>
+    <!-- PERFIL -->
+    <main class="container profile-container">
+        <h1>Mi perfil</h1>
 
-                <div class="info-column">
-                    <p><strong>Email:</strong> <span id="userEmail">—</span></p>
-                    <p><strong>Nombre:</strong></p>
-                    <input id="userNameInput" type="text" placeholder="Tu nombre">
-
-                    <label for="avatarInput" class="file-label">Subir avatar</label>
-                    <input id="avatarInput" type="file" accept="image/*" style="display:none;">
-
-                    <button id="uploadBtn" class="btn">Subir avatar</button>
-                    <button id="saveNameBtn" class="btn btn-ghost">Guardar nombre</button>
-                </div>
+        <section class="profile-card">
+            <!-- Avatar -->
+            <div class="avatar-wrap">
+                <img id="avatarImg" src="https://via.placeholder.com/150" alt="Avatar del usuario" class="avatar">
+                <label for="avatarInput" class="icon-btn" aria-label="Cambiar avatar">📷</label>
+                <input id="avatarInput" type="file" accept="image/*" style="display:none;">
             </div>
 
-            <div id="msgBox" class="msgBox"></div>
-        </div>
+            <!-- Info usuario -->
+            <div class="profile-info">
+                <p><strong>Email:</strong> <span id="userEmail">—</span></p>
+
+                <div class="editable-field">
+                    <label for="userNameInput">Nombre</label>
+                    <input id="userNameInput" type="text" placeholder="Tu nombre">
+                </div>
+
+                <div class="editable-field">
+                    <label for="userBioInput">Descripción</label>
+                    <textarea id="userBioInput" rows="3" placeholder="Escribe algo sobre ti..."></textarea>
+                </div>
+
+                <button id="saveProfileBtn" class="btn">Guardar cambios</button>
+            </div>
+        </section>
+
+        <!-- Galería personal -->
+        <section>
+            <h2>Mis imágenes</h2>
+            <div id="userGallery" class="gallery-grid" aria-live="polite"></div>
+        </section>
+
+        <div id="msgBox" class="msgBox" role="alert"></div>
     </main>
+
+    <!-- FOOTER -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <p>© 2025 NSK. Todos los derechos reservados.</p>
+        </div>
+    </footer>
 
     <script src="profile.js"></script>
 </body>

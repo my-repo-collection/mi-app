@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Iniciar Sesión</title>
+    <title>Registro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js" defer></script>
@@ -16,23 +16,22 @@
             <a href="index.html" class="logo">NSK</a>
             <ul class="nav-links">
                 <li><a href="index.html">Inicio</a></li>
-                <li><a href="galeria.html">Galería</a></li>
-                <li><a href="login.html" aria-current="page">Login</a></li>
+                <li><a href="register.html" aria-current="page">Registrarse</a></li>
             </ul>
         </div>
     </nav>
 
     <main class="page-center">
         <div class="card container">
-            <h1>Iniciar sesión</h1>
-            <form id="loginForm" class="form-box" autocomplete="on">
-                <label for="loginEmail">Email</label>
-                <input id="loginEmail" type="email" placeholder="nombre@ejemplo.com" required>
+            <h1>Crear cuenta</h1>
+            <form id="registerForm" class="form-box" autocomplete="on">
+                <label for="registerEmail">Email</label>
+                <input id="registerEmail" type="email" placeholder="nombre@ejemplo.com" required>
 
-                <label for="loginPassword">Contraseña</label>
-                <input id="loginPassword" type="password" placeholder="Tu contraseña" required>
+                <label for="registerPassword">Contraseña</label>
+                <input id="registerPassword" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required>
 
-                <button id="loginBtn" class="btn">Entrar</button>
+                <button id="registerBtn" class="btn">Crear cuenta</button>
             </form>
             <div id="msgBox" class="msgBox" role="alert"></div>
         </div>
@@ -42,7 +41,7 @@
         <p>© 2025 NSK</p>
     </footer>
 
-    <script src="login.js"></script>
+    <script src="register.js"></script>
 </body>
 
 </html>
