@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil de Usuario</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Perfil</h1>
+        <div class="profile-box">
+            <img id="avatarImg" src="https://via.placeholder.com/150" alt="Avatar">
+            <p><strong>Email:</strong> <span id="userEmail"></span></p>
+            <p><strong>Nombre:</strong> <span id="userName">Sin nombre</span></p>
+
+            <h3>Subir nuevo avatar</h3>
+            <input type="file" id="avatarInput">
+            <button id="uploadBtn">Subir</button>
+
+            <button id="logoutBtn" class="logout">Cerrar sesión</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="profile.js"></script>
+</body>
+
+</html>
