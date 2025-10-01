@@ -1,72 +1,67 @@
-// Inicializar Supabase
-const supabaseUrl = "https://illwxhdyndqkfvvzbasr.supabase.co"; // ✅ tu URL real
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbHd4aGR5bmRxa2Z2dnpiYXNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MDE1OTMsImV4cCI6MjA3NDQ3NzU5M30.OJJ3TQgsdsCtIbv8DZZ7KZU2FJUjzh0FmeEWZ0Q_ZAs"; // ✅ tu anon key
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const SUPABASE_URL = "https://illwxhdyndqkfvvzbasr.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsbHd4aGR5bmRxa2Z2dnpiYXNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MDE1OTMsImV4cCI6MjA3NDQ3NzU5M30.OJJ3TQgsdsCtIbv8DZZ7KZU2FJUjzh0FmeEWZ0Q_ZAs";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Cargar datos de usuario
-async function loadProfile() {
-  const { data: { user }, error } = await supabase.auth.getUser();
+const avatarImg = document.getElementById("avatarImg");
+const previewImg = document.getElementById("previewImg");
+const previewWrap = document.getElementById("previewWrap");
+const avatarInput = document.getElementById("avatarInput");
+const uploadBtn = document.getElementById("uploadBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const userEmailSpan = document.getElementById("userEmail");
+const userNameInput = document.getElementById("userNameInput");
+const saveNameBtn = document.getElementById("saveNameBtn");
+const msgBox = document.querySelector("#msgBox");
 
-  if (error || !user) {
-    window.location.href = "index.html";
-    return;
-  }
+function showMessage(msg, type="info"){
+  msgBox.textContent = msg;
+  msgBox.style.color = type==="error" ? "red" : "green";
+}
 
-  document.getElementById("userEmail").innerText = user.email;
+async function loadProfile(){
+  const { data, error } = await supabase.auth.getUser();
+  const user = data?.user;
+  if(!user){ window.location.href="login.html"; return; }
 
-  // Buscar en tabla "usuarios"
-  let { data, error: userError } = await supabase
-    .from("usuarios")
-    .select("*")
-    .eq("email", user.email)
-    .single();
+  userEmailSpan.innerText = user.email;
 
-  if (userError) {
-    console.error("Error cargando datos:", userError.message);
-    return;
-  }
-
-  if (data) {
-    document.getElementById("userName").innerText = data.name || "Sin nombre";
-    if (data.avatar_url) {
-      document.getElementById("avatarImg").src = data.avatar_url;
-    }
+  const { data: row } = await supabase.from("usuarios").select("*").eq("id", user.id).maybeSingle();
+  if(row){
+    userNameInput.value = row.name || "";
+    if(row.avatar_url) avatarImg.src = row.avatar_url;
   }
 }
 
-// Subir avatar
-document.getElementById("uploadBtn").addEventListener("click", async () => {
-  const file = document.getElementById("avatarInput").files[0];
-  if (!file) return alert("Selecciona un archivo primero.");
-
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) return alert("Debes iniciar sesión primero.");
-
-  const filePath = `${user.id}/${file.name}`;
-
-  let { error: uploadError } = await supabase.storage
-    .from("avatars")
-    .upload(filePath, file, { upsert: true });
-
-  if (uploadError) return alert("Error al subir avatar: " + uploadError.message);
-
-  const { data: publicUrl } = supabase.storage.from("avatars").getPublicUrl(filePath);
-
-  // Guardar URL en tabla usuarios
-  await supabase
-    .from("usuarios")
-    .update({ avatar_url: publicUrl.publicUrl })
-    .eq("email", user.email);
-
-  document.getElementById("avatarImg").src = publicUrl.publicUrl;
-  alert("Avatar actualizado!");
+avatarInput.addEventListener("change",(e)=>{
+  const file = e.target.files[0];
+  if(file){
+    previewImg.src = URL.createObjectURL(file);
+    previewWrap.style.display="block";
+  }
 });
 
-// Logout
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-  await supabase.auth.signOut();
-  window.location.href = "index.html";
+uploadBtn.addEventListener("click", async ()=>{
+  const file = avatarInput.files[0];
+  if(!file) return showMessage("Selecciona un archivo","error");
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+  const path = `${user.id}/${Date.now()}_${file.name}`;
+  const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert:true });
+  if(error) return showMessage("Error subiendo avatar","error");
+  const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+  await supabase.from("usuarios").update({ avatar_url: pub.publicUrl }).eq("id", user.id);
+  avatarImg.src = pub.publicUrl;
+  showMessage("Avatar actualizado","success");
 });
 
-// Al cargar página
+saveNameBtn.addEventListener("click", async ()=>{
+  const name = userNameInput.value.trim();
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+  await supabase.from("usuarios").update({ name }).eq("id", user.id);
+  showMessage("Nombre guardado","success");
+});
+
+logoutBtn.addEventListener("click", async ()=>{ await supabase.auth.signOut(); window.location.href="login.html"; });
+
 loadProfile();

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Login</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+</head>
+
+<body>
+    <main class="page-center">
+        <div class="card container">
+            <h1 class="brand">Iniciar sesión</h1>
+
+            <form id="loginForm" class="form-box" autocomplete="on">
+                <label>Email</label>
+                <input id="loginEmail" type="email" placeholder="nombre@ejemplo.com" required>
+
+                <label>Contraseña</label>
+                <input id="loginPassword" type="password" placeholder="Tu contraseña" required>
+
+                <button id="loginBtn" class="btn">Entrar</button>
+            </form>
+
+            <div id="msgBox" class="msgBox"></div>
+        </div>
+    </main>
+
+    <script src="login.js"></script>
+</body>
+
+</html>
