@@ -139,13 +139,3 @@ if (isOwner) {
 }
 
 
-if (!isOwner) {
-  // ocultar botones de edición
-  document.querySelectorAll(".icon-btn, .btn.small, #upload-image-btn, #avatar-input, #image-input").forEach(el => el.style.display = "none");
-
-  // ocultar logout (no tiene sentido en perfil ajeno)
-  document.getElementById("logout").style.display = "none";
-
-  // marcar el perfil como público
-  document.getElementById("profile-card").classList.add("public-mode");
-}

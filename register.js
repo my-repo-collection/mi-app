@@ -17,22 +17,31 @@ document.addEventListener("DOMContentLoaded", () => {
       const email = document.getElementById("registerEmail").value.trim();
       const password = document.getElementById("registerPassword").value;
 
-      if (!/\S+@\S+\.\S+/.test(email)) return showMessage("Email inválido", "error");
-      if (password.length < 6) return showMessage("La contraseña debe tener al menos 6 caracteres", "error");
+      if (!email || !password) return showMessage("Completa todos los campos", "error");
 
+      // feedback inmediato en botón
       registerBtn.disabled = true;
-      showMessage("Registrando... Revisa tu correo.", "info");
+      registerBtn.classList.add("btn-loading");
+      registerBtn.textContent = "Creando cuenta...";
+      showMessage("Registrando usuario...");
 
       try {
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
+        if (!data?.user) throw new Error("No se pudo registrar el usuario");
 
-        showMessage("Registro completado. Revisa tu correo para confirmar.", "success");
+        // éxito
+        registerBtn.textContent = "¡Listo!";
+        showMessage("Registro correcto. Redirigiendo al login...", "success");
+
+        setTimeout(() => window.location.href = "login.html", 1200);
       } catch (err) {
         console.error(err);
         showMessage(err.message, "error");
+        registerBtn.textContent = "Registrarme";
       } finally {
         registerBtn.disabled = false;
+        registerBtn.classList.remove("btn-loading");
       }
     });
   }

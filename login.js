@@ -19,7 +19,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!email || !password) return showMessage("Completa los campos", "error");
 
+      // feedback inmediato en el botón
       loginBtn.disabled = true;
+      loginBtn.classList.add("btn-loading");
+      loginBtn.textContent = "Ingresando...";
       showMessage("Iniciando sesión...");
 
       try {
@@ -27,13 +30,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (error) throw error;
         if (!data?.user) throw new Error("No se pudo iniciar sesión");
 
+        // éxito → feedback + redirección
+        loginBtn.textContent = "¡Bienvenido!";
         showMessage("Login correcto. Redirigiendo...", "success");
-        setTimeout(() => window.location.href = "profile.html", 800);
+
+        setTimeout(() => window.location.href = "profile.html", 1000);
       } catch (err) {
         console.error(err);
         showMessage(err.message, "error");
+        loginBtn.textContent = "Entrar";
       } finally {
         loginBtn.disabled = false;
+        loginBtn.classList.remove("btn-loading");
       }
     });
   }

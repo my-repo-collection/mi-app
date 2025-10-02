@@ -438,3 +438,16 @@ footer a:hover {
 .profile-card.public-mode .gallery-section {
     margin-top: 30px;
 }
+
+/* Botón en estado de login */
+.form button.btn-loading {
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(106, 17, 203, 0.6);
+    transform: scale(1.02);
+}
+
+button.btn-loading {
+    background: var(--accent);
+    box-shadow: 0 0 10px rgba(106, 17, 203, 0.6);
+    transform: scale(1.02);
+}
