@@ -2,41 +2,43 @@
 import { supabase } from "./config.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Helpers UI
+  // --- Helpers para mensajes en UI ---
   function showMsg(text, type = "info") {
     let box = document.getElementById("msgBox");
     if (!box) {
-      // crear msgBox dentro de ownerActions si no existe
       const owner = document.getElementById("ownerActions");
+      box = document.createElement("div");
+      box.id = "msgBox";
+      box.style.marginTop = "10px";
+      box.style.fontSize = "14px";
       if (owner) {
-        box = document.createElement("div");
-        box.id = "msgBox";
-        box.style.marginTop = "10px";
         owner.prepend(box);
       } else {
-        // fallback: body
-        box = document.createElement("div");
-        box.id = "msgBox";
         document.body.prepend(box);
       }
     }
     box.textContent = text;
-    box.style.color = type === "error" ? "#b91c1c" : type === "success" ? "#065f46" : "#374151";
+    box.style.color =
+      type === "error"
+        ? "#b91c1c"
+        : type === "success"
+        ? "#065f46"
+        : "#374151";
   }
   function clearMsg() {
     const b = document.getElementById("msgBox");
     if (b) b.textContent = "";
   }
 
-  // 1) detectar parámetro id (si visita otro perfil)
+  // --- 1) Detectar si visita otro perfil ---
   const params = new URLSearchParams(window.location.search);
   const perfilIdParam = params.get("id");
 
-  // 2) obtener sesión (puede no haber si visitante)
+  // --- 2) Obtener usuario logueado ---
   const sessionResp = await supabase.auth.getUser();
   const user = sessionResp?.data?.user ?? null;
+
   if (!user && !perfilIdParam) {
-    // no hay sesión y no se pide perfil público: forzar login
     window.location.href = "login.html";
     return;
   }
@@ -44,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const idBuscado = perfilIdParam || user.id;
   const esDueno = user ? idBuscado === user.id : false;
 
-  // 3) cargar perfil desde DB
+  // --- 3) Cargar perfil desde DB ---
   let currentProfile = null;
   try {
     const { data: profile, error } = await supabase
@@ -56,12 +58,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (error) throw error;
     currentProfile = profile;
   } catch (err) {
-    console.error("Error cargando perfil:", err.message || err);
+    console.error("❌ Error cargando perfil:", err.message || err);
     document.body.innerHTML = "<p>Error cargando perfil.</p>";
     return;
   }
 
-  // 4) Renderizar datos básicos
+  // --- 4) Renderizar datos ---
   const userNameEl = document.getElementById("userName");
   const userEmailEl = document.getElementById("userEmail");
   const userBioEl = document.getElementById("userBio");
@@ -70,13 +72,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (userNameEl) userNameEl.textContent = currentProfile.name || "Sin nombre";
   if (userEmailEl) userEmailEl.textContent = currentProfile.email || "";
   if (userBioEl) userBioEl.textContent = currentProfile.bio || "Sin biografía";
-  if (avatarPreview) avatarPreview.src = currentProfile.avatar_url || "https://via.placeholder.com/120";
+  if (avatarPreview)
+    avatarPreview.src =
+      currentProfile.avatar_url || "https://via.placeholder.com/120";
 
-  // 5) Mostrar/ocultar zona de edición para dueño
+  // --- 5) Mostrar/ocultar zona de edición ---
   const ownerActions = document.getElementById("ownerActions");
   if (ownerActions) ownerActions.style.display = esDueno ? "block" : "none";
 
-  // 6) LOGICA: Toggle formulario editar
+  // --- 6) Toggle edición ---
   const editToggleBtn = document.getElementById("editToggleBtn");
   const editForm = document.getElementById("editProfileForm");
   const nameInput = document.getElementById("nameInput");
@@ -84,17 +88,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   const avatarInput = document.getElementById("avatarInput");
 
   if (esDueno && editToggleBtn && editForm) {
-    // poblar valores iniciales
-    if (nameInput) nameInput.value = currentProfile.name || "";
-    if (bioInput) bioInput.value = currentProfile.bio || "";
+    nameInput.value = currentProfile.name || "";
+    bioInput.value = currentProfile.bio || "";
 
     editToggleBtn.addEventListener("click", () => {
-      editForm.style.display = editForm.style.display === "block" ? "none" : "block";
+      editForm.style.display =
+        editForm.style.display === "block" ? "none" : "block";
       clearMsg();
     });
   }
 
-  // 7) Handler: guardar cambios de perfil (avatar, name, bio)
+  // --- 7) Guardar cambios de perfil ---
   if (esDueno && editForm) {
     editForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -112,36 +116,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       let avatarUrl = currentProfile.avatar_url || null;
 
-      // Subir avatar si hay archivo
       if (file) {
         try {
-          // crear path único
           const ext = file.name.split(".").pop();
-          const filePath = `avatars/${user.id}/avatar-${Date.now()}.${ext}`;
+          const filePath = `${user.id}/avatar.${ext}`;
 
           const { error: uploadError } = await supabase.storage
             .from("avatars")
             .upload(filePath, file, { upsert: true });
+          if (uploadError) throw uploadError;
 
-          if (uploadError) {
-            console.error("Error subiendo avatar:", uploadError.message);
-            showMsg("Error subiendo la imagen de perfil: " + uploadError.message, "error");
-            if (saveBtn) { saveBtn.disabled = false; saveBtn.style.opacity = "1"; }
-            return;
-          }
-
-          // getPublicUrl (no es async)
-          const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+          const { data } = supabase.storage
+            .from("avatars")
+            .getPublicUrl(filePath);
           avatarUrl = data?.publicUrl || avatarUrl;
         } catch (err) {
-          console.error("Excepción subiendo avatar:", err);
-          showMsg("Error subiendo la imagen de perfil.", "error");
-          if (saveBtn) { saveBtn.disabled = false; saveBtn.style.opacity = "1"; }
+          console.error("❌ Error subiendo avatar:", err);
+          showMsg("Error subiendo avatar: " + err.message, "error");
+          if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.style.opacity = "1";
+          }
           return;
         }
       }
 
-      // Actualizar fila en usuarios
       try {
         const { error: updateError } = await supabase
           .from("usuarios")
@@ -154,7 +153,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (updateError) throw updateError;
 
-        // actualizar UI sin recargar
         currentProfile.name = newName;
         currentProfile.bio = newBio;
         currentProfile.avatar_url = avatarUrl;
@@ -164,23 +162,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (avatarPreview && avatarUrl) avatarPreview.src = avatarUrl;
 
         showMsg("✅ Perfil actualizado con éxito", "success");
-        // cerrar form
         editForm.style.display = "none";
       } catch (err) {
-        console.error("Error actualizando perfil:", err.message || err);
-        showMsg("No se pudo actualizar el perfil: " + (err.message || err), "error");
-
-        // si es error RLS típico, indicar al usuario
-        if (err?.message && err.message.includes("row-level")) {
-          showMsg("Permiso denegado: revisa la policy RLS en la tabla 'usuarios'.", "error");
-        }
+        console.error("❌ Error actualizando perfil:", err);
+        showMsg("No se pudo actualizar el perfil: " + err.message, "error");
       } finally {
-        if (saveBtn) { saveBtn.disabled = false; saveBtn.style.opacity = "1"; }
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.style.opacity = "1";
+        }
       }
     });
   }
 
-  // 8) Cargar galería y render
+  // --- 8) Cargar galería ---
   async function refreshGallery() {
     try {
       const { data: images, error: imgError } = await supabase
@@ -192,14 +187,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (imgError) throw imgError;
       renderGallery(images || [], esDueno);
     } catch (err) {
-      console.error("Error cargando galería:", err.message || err);
-      showMsg("Error cargando galería: " + (err.message || err), "error");
+      console.error("❌ Error galería:", err);
+      showMsg("Error cargando galería: " + err.message, "error");
     }
   }
-
   await refreshGallery();
 
-  // 9) Upload nueva imagen (si es dueño)
+  // --- 9) Subir nueva imagen ---
   const uploadForm = document.getElementById("uploadForm");
   if (esDueno && uploadForm) {
     uploadForm.addEventListener("submit", async (e) => {
@@ -208,39 +202,52 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const fileInput = document.getElementById("imageInput");
       const file = fileInput?.files?.[0];
-      if (!file) { showMsg("Selecciona una imagen antes de subir.", "error"); return; }
+      if (!file) {
+        showMsg("Selecciona una imagen antes de subir.", "error");
+        return;
+      }
 
       const uploadBtn = uploadForm.querySelector("button[type='submit']");
-      if (uploadBtn) { uploadBtn.disabled = true; uploadBtn.style.opacity = "0.7"; }
+      if (uploadBtn) {
+        uploadBtn.disabled = true;
+        uploadBtn.style.opacity = "0.7";
+      }
 
       try {
         const ext = file.name.split(".").pop();
-        const filePath = `images/${user.id}/${Date.now()}.${ext}`;
+        const filePath = `${user.id}/${Date.now()}.${ext}`;
 
-        const { error: uploadError } = await supabase.storage.from("imagenes").upload(filePath, file, { upsert: true });
+        const { error: uploadError } = await supabase.storage
+          .from("imagenes")
+          .upload(filePath, file, { upsert: true });
         if (uploadError) throw uploadError;
 
-        const { data } = supabase.storage.from("imagenes").getPublicUrl(filePath);
+        const { data } = supabase.storage
+          .from("imagenes")
+          .getPublicUrl(filePath);
         const publicUrl = data?.publicUrl;
 
-        const { error: insertError } = await supabase.from("imagenes").insert([
-          { user_id: user.id, url: publicUrl, titulo: null, categoria: null }
-        ]);
+        const { error: insertError } = await supabase
+          .from("imagenes")
+          .insert([{ user_id: user.id, url: publicUrl, path: filePath }]);
         if (insertError) throw insertError;
 
         showMsg("✅ Imagen subida", "success");
         fileInput.value = "";
         await refreshGallery();
       } catch (err) {
-        console.error("Error subiendo imagen:", err.message || err);
-        showMsg("Error subiendo imagen: " + (err.message || err), "error");
+        console.error("❌ Error subiendo imagen:", err);
+        showMsg("Error subiendo imagen: " + err.message, "error");
       } finally {
-        if (uploadBtn) { uploadBtn.disabled = false; uploadBtn.style.opacity = "1"; }
+        if (uploadBtn) {
+          uploadBtn.disabled = false;
+          uploadBtn.style.opacity = "1";
+        }
       }
     });
   }
 
-  // 10) Render de gallery con acciones
+  // --- 10) Renderizar galería ---
   function renderGallery(images, esDuenoLocal) {
     const gallery = document.getElementById("galleryGrid");
     if (!gallery) return;
@@ -251,7 +258,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    images.forEach(img => {
+    images.forEach((img) => {
       const card = document.createElement("div");
       card.className = "image-card";
 
@@ -266,13 +273,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const delBtn = document.createElement("button");
         delBtn.textContent = "🗑 Eliminar";
-        delBtn.classList.add("delete");
-        delBtn.onclick = () => confirmDeleteImage(img.id, img.url);
+        delBtn.onclick = () => confirmDeleteImage(img.id, img.path);
 
         const repBtn = document.createElement("button");
         repBtn.textContent = "♻️ Reemplazar";
-        repBtn.classList.add("replace");
-        repBtn.onclick = () => handleReplaceImage(img.id, img.url);
+        repBtn.onclick = () => handleReplaceImage(img.id);
 
         actions.appendChild(delBtn);
         actions.appendChild(repBtn);
@@ -283,31 +288,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // eliminar imagen: borra del storage (por path) y de la tabla
-  async function confirmDeleteImage(imageId, imageUrl) {
+  // --- 11) Eliminar imagen ---
+  async function confirmDeleteImage(imageId, filePath) {
     if (!confirm("¿Seguro que quieres eliminar esta imagen?")) return;
 
     try {
-      // intentar deducir path (asume que guardaste con estructura 'images/{user.id}/...' )
-      const parts = imageUrl.split("/");
-      const filePath = parts.slice(-2).join("/"); // por ejemplo "USERID/12345.jpg" o ajuste según tu URL
-      // Mejor buscar fila y extraer path desde url si tu app guarda 'path' también; aquí hacemos un intento
-      const { error: rmError } = await supabase.storage.from("imagenes").remove([filePath]);
-      if (rmError) console.warn("warning al borrar del storage:", rmError.message);
+      const { error: rmError } = await supabase.storage
+        .from("imagenes")
+        .remove([filePath]);
+      if (rmError) console.warn("⚠️ Error borrando storage:", rmError.message);
 
-      const { error: dbError } = await supabase.from("imagenes").delete().eq("id", imageId);
+      const { error: dbError } = await supabase
+        .from("imagenes")
+        .delete()
+        .eq("id", imageId);
       if (dbError) throw dbError;
 
       showMsg("✅ Imagen eliminada", "success");
       await refreshGallery();
     } catch (err) {
-      console.error("Error eliminando imagen:", err.message || err);
-      showMsg("Error eliminando imagen: " + (err.message || err), "error");
+      console.error("❌ Error eliminando:", err);
+      showMsg("Error eliminando imagen: " + err.message, "error");
     }
   }
 
-  // reemplazar imagen: abrir input file, subir, actualizar fila
-  function handleReplaceImage(imageId /*, oldUrl */) {
+  // --- 12) Reemplazar imagen ---
+  function handleReplaceImage(imageId) {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
@@ -319,21 +325,28 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       try {
         const ext = file.name.split(".").pop();
-        const filePath = `images/${user.id}/${Date.now()}.${ext}`;
-        const { error: uploadError } = await supabase.storage.from("imagenes").upload(filePath, file, { upsert: true });
+        const filePath = `${user.id}/${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from("imagenes")
+          .upload(filePath, file, { upsert: true });
         if (uploadError) throw uploadError;
 
-        const { data } = supabase.storage.from("imagenes").getPublicUrl(filePath);
+        const { data } = supabase.storage
+          .from("imagenes")
+          .getPublicUrl(filePath);
         const publicUrl = data?.publicUrl;
 
-        const { error: updateError } = await supabase.from("imagenes").update({ url: publicUrl }).eq("id", imageId);
+        const { error: updateError } = await supabase
+          .from("imagenes")
+          .update({ url: publicUrl, path: filePath })
+          .eq("id", imageId);
         if (updateError) throw updateError;
 
         showMsg("✅ Imagen reemplazada", "success");
         await refreshGallery();
       } catch (err) {
-        console.error("Error reemplazando imagen:", err.message || err);
-        showMsg("Error reemplazando imagen: " + (err.message || err), "error");
+        console.error("❌ Error reemplazando:", err);
+        showMsg("Error reemplazando imagen: " + err.message, "error");
       }
     };
   }

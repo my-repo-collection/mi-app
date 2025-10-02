@@ -9,33 +9,34 @@
 </head>
 
 <body>
-<header>
-    <div class="logo">📸 Mi Galería</div>
-    <nav>
-        <ul>
-            <li><a href="index.html">Inicio</a></li>
-            <li><a href="login.html" id="loginNav">Login</a></li>
-            <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
-            <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
-        </ul>
-    </nav>
-</header>
+    <header>
+        <div class="logo">📸 Mi Galería</div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="login.html" id="loginNav">Login</a></li>
+                <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
+                <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
+            </ul>
+        </nav>
+    </header>
 
     <main class="profile-container">
-        <!-- Panel de usuario -->
+        <!-- Tarjeta de perfil -->
         <section class="profile-card">
-            <img id="avatarPreview" src="https://via.placeholder.com/120" alt="Avatar">
-
+            <div class="avatar-box">
+                <img id="avatarPreview" src="https://via.placeholder.com/120" alt="Avatar">
+            </div>
             <h2 id="userName">Sin nombre</h2>
             <p id="userEmail">correo@ejemplo.com</p>
             <p id="userBio">Sin biografía</p>
 
-            <!-- Botón de compartir perfil -->
-            <button id="shareProfileBtn">🔗 Compartir perfil</button>
+            <!-- Botón compartir perfil -->
+            <button id="shareProfileBtn" class="btn-secondary">🔗 Compartir perfil</button>
 
-            <!-- Opciones solo visibles si es dueño -->
+            <!-- Acciones solo del dueño -->
             <div id="ownerActions" style="display:none;">
-                <button id="editToggleBtn">✏️ Editar perfil</button>
+                <button id="editToggleBtn" class="btn-primary">✏️ Editar perfil</button>
 
                 <form id="editProfileForm" class="edit-form" style="display:none;">
                     <input type="text" id="nameInput" placeholder="Nombre">
@@ -43,21 +44,21 @@
                     <label>Foto de perfil:
                         <input type="file" id="avatarInput" accept="image/*">
                     </label>
-                    <button type="submit">💾 Guardar cambios</button>
+                    <button type="submit" class="btn-primary">💾 Guardar cambios</button>
                 </form>
 
                 <hr style="margin:20px 0;">
 
                 <!-- Subir nueva foto -->
                 <h3>📤 Subir nueva foto</h3>
-                <form id="uploadForm">
+                <form id="uploadForm" class="upload-form">
                     <input type="file" id="imageInput" accept="image/*" required>
-                    <button type="submit">⬆️ Subir</button>
+                    <button type="submit" class="btn-primary">⬆️ Subir</button>
                 </form>
             </div>
         </section>
 
-        <!-- Galería de imágenes -->
+        <!-- Galería -->
         <section class="gallery">
             <h3>📷 Imágenes</h3>
             <div id="galleryGrid" class="gallery-grid">
@@ -70,6 +71,7 @@
         <p>© 2025 Mi Galería</p>
     </footer>
 
+    <!-- Scripts -->
     <script type="module" src="profile.js"></script>
     <script type="module" src="header.js"></script>
 </body>
