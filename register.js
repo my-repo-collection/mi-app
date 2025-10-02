@@ -23,24 +23,33 @@ document.addEventListener("DOMContentLoaded", () => {
         return showMessage("Completa todos los campos", "error");
       }
 
-      // feedback inmediato en botón
       registerBtn.disabled = true;
       registerBtn.classList.add("btn-loading");
       registerBtn.textContent = "Creando cuenta...";
       showMessage("Registrando usuario...");
 
       try {
+        // Crear en Auth
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
         if (!data?.user) throw new Error("No se pudo registrar el usuario");
 
-        // éxito → feedback + redirigir a perfil
+        // Crear en tabla usuarios
+        const { error: insertError } = await supabase.from("usuarios").insert({
+          id: data.user.id,
+          name: email.split("@")[0], // por defecto
+          bio: "",
+          avatar_url: ""
+        });
+        if (insertError) throw insertError;
+
         registerBtn.textContent = "¡Listo!";
         showMessage("Cuenta creada. Redirigiendo al perfil...", "success");
 
         setTimeout(() => {
-          window.location.href = "profile.html";
-        }, 1000);
+          window.location.href = `profile.html?user=${data.user.id}`;
+        }, 1200);
+
       } catch (err) {
         console.error(err);
         showMessage(err.message, "error");

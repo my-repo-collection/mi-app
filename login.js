@@ -8,7 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function showMessage(msg, type = "info") {
     msgBox.textContent = msg;
-    msgBox.style.color = type === "error" ? "red" : (type === "success" ? "green" : "#333");
+    msgBox.style.color =
+      type === "error" ? "red" :
+      type === "success" ? "green" : "#333";
   }
 
   if (loginForm) {
@@ -19,10 +21,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!email || !password) return showMessage("Completa los campos", "error");
 
-      // feedback inmediato en el botón
       loginBtn.disabled = true;
       loginBtn.classList.add("btn-loading");
-      loginBtn.textContent = "Ingresando...";
+      loginBtn.textContent = "Entrando...";
       showMessage("Iniciando sesión...");
 
       try {
@@ -30,11 +31,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (error) throw error;
         if (!data?.user) throw new Error("No se pudo iniciar sesión");
 
-        // éxito → feedback + redirección
         loginBtn.textContent = "¡Bienvenido!";
         showMessage("Login correcto. Redirigiendo...", "success");
 
-        setTimeout(() => window.location.href = "profile.html", 1000);
+        setTimeout(() => {
+          window.location.href = `profile.html?user=${data.user.id}`;
+        }, 1000);
+
       } catch (err) {
         console.error(err);
         showMessage(err.message, "error");

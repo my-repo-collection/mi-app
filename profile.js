@@ -2,80 +2,144 @@
 import { supabase } from "./config.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const urlParams = new URLSearchParams(window.location.search);
+  const viewedUserId = urlParams.get("user");
 
-  const avatarImg = document.getElementById("avatar");
-  const userName = document.getElementById("user-name");
-  const userBio = document.getElementById("user-bio");
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) window.location.href = "login.html";
 
-  const editAvatarBtn = document.getElementById("editAvatarBtn");
-  const editNameBtn = document.getElementById("editNameBtn");
-  const editBioBtn = document.getElementById("editBioBtn");
+  const isOwner = !viewedUserId || viewedUserId === user.id;
+  const userId = viewedUserId || user.id;
 
-  if (error || !user) {
-    // No logueado → redirige a login o muestra modo visitante
-    window.location.href = "login.html";
-    return;
+  // Elementos
+  const nameEl = document.getElementById("user-name");
+  const bioEl = document.getElementById("user-bio");
+  const avatarEl = document.getElementById("avatar");
+  const nameInput = document.getElementById("name-input");
+  const bioInput = document.getElementById("bio-input");
+  const avatarInput = document.getElementById("avatar-input");
+  const editNameBtn = document.getElementById("edit-name");
+  const saveNameBtn = document.getElementById("save-name");
+  const editBioBtn = document.getElementById("edit-bio");
+  const saveBioBtn = document.getElementById("save-bio");
+  const changeAvatarBtn = document.getElementById("change-avatar");
+  const saveAvatarBtn = document.getElementById("save-avatar");
+  const uploadBtn = document.getElementById("upload-image-btn");
+  const imageInput = document.getElementById("image-input");
+  const gallery = document.getElementById("profile-gallery");
+  const logoutBtn = document.getElementById("logout");
+
+  // Ocultar controles si no es dueño
+  if (!isOwner) {
+    document.querySelectorAll(".icon-btn, .btn.small, #upload-image-btn").forEach(el => el.style.display = "none");
+    if (logoutBtn) logoutBtn.style.display = "none";
   }
 
-  // ✅ Usuario autenticado → activa modo edición
-  editAvatarBtn.style.display = "inline-block";
-  editNameBtn.style.display = "inline-block";
-  editBioBtn.style.display = "inline-block";
+  // Cargar datos del perfil
+  const { data: perfil } = await supabase.from("usuarios").select("name, bio, avatar_url").eq("id", userId).single();
 
-  // Cargar datos desde tu tabla "profiles"
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  if (profile) {
-    avatarImg.src = profile.avatar_url || "default-avatar.png";
-    userName.textContent = profile.full_name || user.email;
-    userBio.textContent = profile.bio || "Escribe algo sobre ti...";
+  if (perfil) {
+    nameEl.textContent = perfil.name || "Usuario sin nombre";
+    bioEl.textContent = perfil.bio || "Este usuario aún no escribió nada.";
+    if (perfil.avatar_url) avatarEl.src = perfil.avatar_url;
   }
 
-  // --- Eventos de edición ---
-  editNameBtn.addEventListener("click", async () => {
-    const newName = prompt("Nuevo nombre:", profile?.full_name || "");
-    if (newName) {
-      await supabase.from("profiles").update({ full_name: newName }).eq("id", user.id);
-      userName.textContent = newName;
+  // Editar avatar
+  if (isOwner) {
+    changeAvatarBtn.addEventListener("click", () => avatarInput.click());
+    avatarInput.addEventListener("change", () => saveAvatarBtn.classList.remove("hidden"));
+
+    saveAvatarBtn.addEventListener("click", async () => {
+      const file = avatarInput.files[0];
+      if (!file) return;
+
+      const fileName = `avatar-${user.id}.${file.name.split(".").pop()}`;
+      await supabase.storage.from("avatars").upload(fileName, file, { upsert: true });
+
+      const { data: signedData } = await supabase.storage.from("avatars").createSignedUrl(fileName, 3600);
+      const avatarUrl = signedData?.signedUrl;
+
+      avatarEl.src = avatarUrl;
+      await supabase.from("usuarios").update({ avatar_url: avatarUrl }).eq("id", user.id);
+
+      saveAvatarBtn.classList.add("hidden");
+    });
+  }
+
+  // Editar nombre
+  if (isOwner) {
+    editNameBtn.addEventListener("click", () => {
+      nameInput.value = nameEl.textContent;
+      nameInput.classList.remove("hidden");
+      nameEl.classList.add("hidden");
+      saveNameBtn.classList.remove("hidden");
+    });
+
+    saveNameBtn.addEventListener("click", async () => {
+      await supabase.from("usuarios").update({ name: nameInput.value }).eq("id", user.id);
+      nameEl.textContent = nameInput.value;
+      nameEl.classList.remove("hidden");
+      nameInput.classList.add("hidden");
+      saveNameBtn.classList.add("hidden");
+    });
+  }
+
+  // Editar bio
+  if (isOwner) {
+    editBioBtn.addEventListener("click", () => {
+      bioInput.value = bioEl.textContent;
+      bioInput.classList.remove("hidden");
+      bioEl.classList.add("hidden");
+      saveBioBtn.classList.remove("hidden");
+    });
+
+    saveBioBtn.addEventListener("click", async () => {
+      await supabase.from("usuarios").update({ bio: bioInput.value }).eq("id", user.id);
+      bioEl.textContent = bioInput.value;
+      bioEl.classList.remove("hidden");
+      bioInput.classList.add("hidden");
+      saveBioBtn.classList.add("hidden");
+    });
+  }
+
+  // Galería del perfil
+  async function loadImages() {
+    const { data } = await supabase.from("imagenes").select("url, name").eq("user_id", userId).order("id", { ascending: false });
+
+    gallery.innerHTML = "";
+    if (data && data.length > 0) {
+      data.forEach(img => {
+        const el = document.createElement("img");
+        el.src = img.url;
+        el.alt = img.name;
+        gallery.appendChild(el);
+      });
+    } else {
+      gallery.innerHTML = "<p>No hay imágenes en este perfil.</p>";
     }
-  });
+  }
+  loadImages();
 
-  editBioBtn.addEventListener("click", async () => {
-    const newBio = prompt("Nueva bio:", profile?.bio || "");
-    if (newBio) {
-      await supabase.from("profiles").update({ bio: newBio }).eq("id", user.id);
-      userBio.textContent = newBio;
-    }
-  });
+  // Subir imágenes al perfil
+  if (isOwner) {
+    uploadBtn.addEventListener("click", () => imageInput.click());
 
-  editAvatarBtn.addEventListener("click", () => {
-    document.getElementById("avatarUpload").click();
-  });
+    imageInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
 
-  document.getElementById("avatarUpload").addEventListener("change", async (ev) => {
-    const file = ev.target.files[0];
-    if (file) {
-      const filePath = `${user.id}/${file.name}`;
-      let { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file, { upsert: true });
+      const fileName = `img-${Date.now()}-${file.name}`;
+      await supabase.storage.from("imagenes").upload(fileName, file);
 
-      if (!uploadError) {
-        const { data: publicUrl } = supabase.storage.from("avatars").getPublicUrl(filePath);
-        await supabase.from("profiles").update({ avatar_url: publicUrl.publicUrl }).eq("id", user.id);
-        avatarImg.src = publicUrl.publicUrl;
-      }
-    }
-  });
+      const { data: signedData } = await supabase.storage.from("imagenes").createSignedUrl(fileName, 3600);
 
-  // Logout
-  document.getElementById("logout").addEventListener("click", async () => {
-    await supabase.auth.signOut();
-    window.location.href = "index.html";
-  });
+      await supabase.from("imagenes").insert({ user_id: user.id, url: signedData.signedUrl, name: file.name });
+      loadImages();
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      window.location.href = "login.html";
+    });
+  }
 });
