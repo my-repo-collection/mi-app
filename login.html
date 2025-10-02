@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Iniciar sesión | Mi App</title>
+    <title>Login | Mi App</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 </head>
@@ -20,24 +20,24 @@
     </header>
 
     <main class="auth-container">
-        <h1>🔐 Inicia sesión</h1>
+        <h1>🔑 Iniciar sesión</h1>
         <form id="loginForm" class="form">
             <label>Correo
-                <input type="email" id="loginEmail" placeholder="ejemplo@mail.com" required>
+                <input type="email" id="email" placeholder="ejemplo@mail.com" required>
             </label>
             <label>Contraseña
-                <input type="password" id="loginPassword" placeholder="••••••••" required>
+                <input type="password" id="password" placeholder="Tu contraseña" required>
             </label>
-            <button type="submit" id="loginBtn">Entrar</button>
+            <button type="submit">Entrar</button>
         </form>
-        <div id="msgBox" class="msg-box"></div>
+        <div id="errorMsg" class="msgBox"></div>
         <p class="help-text">
-            ¿No tienes cuenta? <a href="register.html">Regístrate aquí</a>
+            ¿No tienes cuenta? <a href="register.html">Regístrate</a>
         </p>
     </main>
 
     <footer>
-        <p>© 2025 Mi Galería. Todos los derechos reservados.</p>
+        <p>© 2025 Mi Galería</p>
     </footer>
 
     <script type="module" src="login.js"></script>

@@ -1,63 +1,50 @@
-// register.js
 import { supabase } from "./config.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const registerForm = document.getElementById("registerForm");
-  const registerBtn = document.getElementById("registerBtn");
-  const msgBox = document.getElementById("msgBox");
+  const form = document.getElementById("registerForm");
+  const errorMsg = document.getElementById("errorMsg");
 
-  function showMessage(msg, type = "info") {
-    msgBox.textContent = msg;
-    msgBox.style.color =
-      type === "error" ? "red" :
-      type === "success" ? "green" : "#333";
-  }
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorMsg.textContent = "";
 
-  if (registerForm) {
-    registerForm.addEventListener("submit", async (ev) => {
-      ev.preventDefault();
-      const email = document.getElementById("registerEmail").value.trim();
-      const password = document.getElementById("registerPassword").value;
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-      if (!email || !password) {
-        return showMessage("Completa todos los campos", "error");
-      }
-
-      registerBtn.disabled = true;
-      registerBtn.classList.add("btn-loading");
-      registerBtn.textContent = "Creando cuenta...";
-      showMessage("Registrando usuario...");
-
-      try {
-        // Crear en Auth
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-        if (!data?.user) throw new Error("No se pudo registrar el usuario");
-
-        // Crear en tabla usuarios
-        const { error: insertError } = await supabase.from("usuarios").insert({
-          id: data.user.id,
-          name: email.split("@")[0], // por defecto
-          bio: "",
-          avatar_url: ""
-        });
-        if (insertError) throw insertError;
-
-        registerBtn.textContent = "¡Listo!";
-        showMessage("Cuenta creada. Redirigiendo al perfil...", "success");
-
-        setTimeout(() => {
-          window.location.href = `profile.html?user=${data.user.id}`;
-        }, 1200);
-
-      } catch (err) {
-        console.error(err);
-        showMessage(err.message, "error");
-        registerBtn.textContent = "Registrarme";
-      } finally {
-        registerBtn.disabled = false;
-        registerBtn.classList.remove("btn-loading");
-      }
+    // 1. Crear usuario en auth
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
     });
-  }
+
+    if (error) {
+      console.error("Error en signUp:", error.message);
+      errorMsg.textContent = error.message;
+      return;
+    }
+
+    const user = data.user;
+    if (!user) {
+      errorMsg.textContent = "No se pudo registrar el usuario.";
+      return;
+    }
+
+    // 2. Insertar perfil en la tabla usuarios
+    const { error: insertError } = await supabase.from("usuarios").insert({
+      id: user.id,          // 👈 usar mismo ID que auth.users
+      email: user.email,
+      name: null,
+      avatar_url: null,
+      bio: null
+    });
+
+    if (insertError) {
+      console.error("Error insertando en usuarios:", insertError.message);
+      errorMsg.textContent = "Error creando el perfil: " + insertError.message;
+      return;
+    }
+
+    // 3. Redirigir al perfil
+    window.location.href = "profile.html";
+  });
 });
