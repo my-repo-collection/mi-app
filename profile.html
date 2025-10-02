@@ -1,82 +1,170 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Perfil | Mi App</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <title>Perfil | Mi Galería</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+  <script type="module" src="config.js"></script>
 </head>
-
 <body>
-    <header>
-        <div class="logo">📸 Mi Galería</div>
-        <nav>
-            <ul>
-                <li><a href="index.html">Inicio</a></li>
-                <li><a href="galeria.html">Explorar</a></li>
-                <li><a href="#" id="logout">Salir</a></li>
-            </ul>
-        </nav>
-    </header>
+  <header>
+    <div class="logo">📸 Mi Galería</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="login.html" id="loginLink">Login</a></li>
+        <li><a href="profile.html" id="profileLink">Mi perfil</a></li>
+      </ul>
+    </nav>
+  </header>
 
-    <main class="profile-container">
-        <div class="profile-card" id="profile-card">
+  <main class="profile-container">
+    <h1>👤 Perfil</h1>
 
-            <!-- Avatar -->
-            <div class="avatar-wrapper">
-                <img id="avatar" src="" alt="Avatar" class="avatar-img" />
-                <input type="file" id="avatarInput" style="display:none;" />
-                <button id="editAvatarBtn" class="edit-btn">
-                    <i class="fa fa-camera"></i> Cambiar foto
-                </button>
-            </div>
+    <!-- Perfil info -->
+    <div class="profile-info">
+      <img id="profileAvatar" src="" alt="Avatar" class="avatar">
+      <h2 id="profileName">Nombre</h2>
+      <p id="profileEmail">Email</p>
+      <p id="profileBio">Biografía</p>
+    </div>
 
-            <!-- Nombre -->
-            <div class="name-wrapper">
-                <h1 id="userName">Nombre del usuario</h1>
-                <input type="text" id="nameInput" style="display:none;" />
-                <button id="editNameBtn" class="edit-btn">
-                    <i class="fa fa-pen"></i> Editar nombre
-                </button>
-                <button id="saveNameBtn" class="edit-btn" style="display:none;">Guardar</button>
-            </div>
+    <!-- Formulario de edición SOLO para dueño -->
+    <div id="editSection" style="display:none;">
+      <h3>✏️ Editar perfil</h3>
+      <form id="editForm">
+        <label>Nombre:
+          <input type="text" id="editName">
+        </label>
+        <label>Biografía:
+          <textarea id="editBio"></textarea>
+        </label>
+        <label>Foto de perfil:
+          <input type="file" id="editAvatar" accept="image/*">
+        </label>
+        <button type="submit">Guardar cambios</button>
+      </form>
+      <div id="msgBox"></div>
+    </div>
 
-            <!-- Bio -->
-            <div class="bio-wrapper">
-                <h2>Sobre mí</h2>
-                <p id="userBio">Este usuario aún no escribió nada.</p>
-                <textarea id="bioInput" style="display:none;"></textarea>
-                <button id="editBioBtn" class="edit-btn">
-                    <i class="fa fa-pen"></i> Editar bio
-                </button>
-                <button id="saveBioBtn" class="edit-btn" style="display:none;">Guardar</button>
-            </div>
+    <!-- Galería -->
+    <h3>📷 Mis imágenes</h3>
+    <div id="gallery" class="gallery-grid"></div>
+  </main>
 
-            <!-- Galería -->
-            <div class="gallery-section">
-                <h2>Mis imágenes</h2>
-                <div class="bento-gallery" id="profileGallery"></div>
+  <footer>
+    <p>© 2025 Mi Galería</p>
+  </footer>
 
-                <!-- Formulario de subida -->
-                <label>Título:
-                    <input type="text" id="imageTitle" placeholder="Ej: Vacaciones en la playa">
-                </label>
-                <label>Tema:
-                    <input type="text" id="imageTema" placeholder="Ej: Paisaje">
-                </label>
-                <button id="uploadImageBtn" class="btn">📤 Subir imagen</button>
-                <input type="file" id="imageInput" accept="image/*" hidden>
-            </div>
-        </div>
-    </main>
+  <script type="module">
+    import { supabase } from "./config.js";
 
-    <footer>
-        <p>© 2025 Mi Galería · Perfil</p>
-    </footer>
+    document.addEventListener("DOMContentLoaded", async () => {
+      // 1. Usuario autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
 
-    <script type="module" src="profile.js"></script>
+      // ¿Se visita otro perfil? Ej: profile.html?id=xxxx
+      const params = new URLSearchParams(window.location.search);
+      const profileId = params.get("id") || user.id; // si no hay id, mostrar el mío
+
+      // 2. Cargar perfil
+      const { data: profile, error } = await supabase
+        .from("usuarios")
+        .select("*")
+        .eq("id", profileId)
+        .single();
+
+      if (error) {
+        console.error("❌ Error cargando perfil:", error.message);
+        return;
+      }
+
+      // Pintar perfil
+      document.getElementById("profileEmail").textContent = profile.email;
+      document.getElementById("profileName").textContent = profile.name || "Sin nombre";
+      document.getElementById("profileBio").textContent = profile.bio || "Sin biografía";
+      if (profile.avatar_url) {
+        document.getElementById("profileAvatar").src = profile.avatar_url;
+      } else {
+        document.getElementById("profileAvatar").src = "default-avatar.png";
+      }
+
+      // 3. Mostrar edición solo si es mi perfil
+      if (profileId === user.id) {
+        document.getElementById("editSection").style.display = "block";
+        document.getElementById("editName").value = profile.name || "";
+        document.getElementById("editBio").value = profile.bio || "";
+      }
+
+      // 4. Guardar cambios
+      const form = document.getElementById("editForm");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("editName").value.trim();
+        const bio = document.getElementById("editBio").value.trim();
+        const file = document.getElementById("editAvatar").files[0];
+
+        let avatarUrl = profile.avatar_url;
+
+        // subir nueva imagen si hay
+        if (file) {
+          const filePath = `${user.id}/${Date.now()}-${file.name}`;
+          const { error: uploadError } = await supabase.storage
+            .from("avatars")
+            .upload(filePath, file, { upsert: true });
+          if (uploadError) {
+            alert("Error subiendo imagen: " + uploadError.message);
+            return;
+          }
+          const { data: publicUrl } = supabase.storage
+            .from("avatars")
+            .getPublicUrl(filePath);
+          avatarUrl = publicUrl.publicUrl;
+        }
+
+        // actualizar perfil
+        const { error: updateError } = await supabase
+          .from("usuarios")
+          .update({ name, bio, avatar_url: avatarUrl })
+          .eq("id", user.id);
+
+        if (updateError) {
+          document.getElementById("msgBox").textContent = "❌ Error guardando cambios";
+        } else {
+          document.getElementById("msgBox").textContent = "✅ Cambios guardados";
+          location.reload();
+        }
+      });
+
+      // 5. Galería de imágenes
+      const { data: images, error: galleryError } = await supabase
+        .from("imagenes")
+        .select("*")
+        .eq("user_id", profileId)
+        .order("created_at", { ascending: false });
+
+      if (galleryError) {
+        console.error("❌ Error cargando galería:", galleryError.message);
+      } else {
+        const galleryDiv = document.getElementById("gallery");
+        if (images.length === 0) {
+          galleryDiv.innerHTML = "<p>Sin imágenes todavía.</p>";
+        } else {
+          images.forEach(img => {
+            const el = document.createElement("img");
+            el.src = img.url;
+            el.alt = img.titulo || "foto";
+            el.classList.add("gallery-item");
+            galleryDiv.appendChild(el);
+          });
+        }
+      }
+    });
+  </script>
 </body>
-
 </html>
