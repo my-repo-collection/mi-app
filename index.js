@@ -1,113 +1,79 @@
 // index.js
-import { supabase } from "./config.js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const gallery = document.getElementById("imagenes-list");
+// 🚀 Conecta a tu proyecto Supabase
+const SUPABASE_URL = "https://TU-PROJECT.supabase.co"; // cambia esto
+const SUPABASE_KEY = "TU-API-KEY"; // cambia esto (anon key)
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  function createLightbox(url, filename = "") {
-    if (document.getElementById("lightbox-overlay")) return;
-    const overlay = document.createElement("div");
-    overlay.id = "lightbox-overlay";
-    overlay.className = "lightbox-overlay";
+// Contenedor de la galería
+const galleryEl = document.getElementById("imagenes-list");
 
-    const content = document.createElement("div");
-    content.className = "lightbox-content";
+/**
+ * Renderiza la galería Bento
+ */
+function renderGallery(imagenes) {
+  galleryEl.innerHTML = "";
 
-    const img = document.createElement("img");
-    img.className = "lightbox-img";
-    img.src = url;
-
-    const actions = document.createElement("div");
-    actions.className = "lightbox-actions";
-
-    const closeBtn = document.createElement("button");
-    closeBtn.textContent = "Cerrar";
-    closeBtn.onclick = () => overlay.remove();
-
-    const copyBtn = document.createElement("button");
-    copyBtn.textContent = "Copiar URL";
-    copyBtn.onclick = async () => {
-      try {
-        await navigator.clipboard.writeText(url);
-        copyBtn.textContent = "Copiado ✓";
-        setTimeout(() => (copyBtn.textContent = "Copiar URL"), 1500);
-      } catch { copyBtn.textContent = "Error"; }
-    };
-
-    const downloadLink = document.createElement("a");
-    downloadLink.textContent = "Descargar";
-    downloadLink.href = url;
-    downloadLink.download = filename || "";
-    downloadLink.className = "lightbox-download";
-
-    actions.appendChild(downloadLink);
-    actions.appendChild(copyBtn);
-    actions.appendChild(closeBtn);
-
-    content.appendChild(img);
-    content.appendChild(actions);
-    overlay.appendChild(content);
-    document.body.appendChild(overlay);
+  if (!imagenes || imagenes.length === 0) {
+    galleryEl.innerHTML = `<p style="text-align:center; color:#666;">No hay imágenes disponibles aún 📭</p>`;
+    return;
   }
 
-  function showSkeletons(count = 6) {
-    gallery.innerHTML = "";
-    for (let i = 0; i < count; i++) {
-      const skel = document.createElement("div");
-      skel.className = "skeleton";
-      skel.style.height = "180px";
-      gallery.appendChild(skel);
-    }
-  }
+  imagenes.forEach(img => {
+    const item = document.createElement("div");
+    item.className = "bento-item";
 
-  async function loadPublicImages() {
-    showSkeletons();
-    try {
-      const { data, error } = await supabase
-        .from("imagenes")
-        .select("id, url, name, created_at, user_id")
-        .order("created_at", { ascending: false })
-        .limit(30);
+    // URL pública del archivo
+    const url = supabase.storage.from("imagenes").getPublicUrl(img.name).data.publicUrl;
 
-      if (error) throw error;
-      if (!data.length) {
-        gallery.innerHTML = `<p>No hay imágenes aún.</p>`;
-        return;
-      }
+    item.innerHTML = `
+      <img src="${url}" alt="${img.name}">
+      <div class="info">
+        <h3>${img.metadata?.title || "Imagen sin título"}</h3>
+        <p>📅 ${new Date(img.created_at).toLocaleDateString()}</p>
+      </div>
+    `;
 
-      gallery.innerHTML = data.map(img => `
-        <div class="bento-item" data-url="${img.url}" data-name="${(img.name||'').replace(/"/g,'')}">
-          <img src="${img.url}" alt="${img.name || "Imagen"}" loading="lazy">
+    // opcional: abrir en lightbox al hacer clic
+    item.addEventListener("click", () => {
+      const overlay = document.createElement("div");
+      overlay.className = "lightbox-overlay";
+      overlay.innerHTML = `
+        <div class="lightbox-content">
+          <img class="lightbox-img" src="${url}" alt="${img.name}">
+          <div class="lightbox-actions">
+            <a class="lightbox-download" href="${url}" download>⬇ Descargar</a>
+            <button onclick="this.closest('.lightbox-overlay').remove()">Cerrar ✖</button>
+          </div>
         </div>
-      `).join("");
+      `;
+      document.body.appendChild(overlay);
+    });
 
-      // attach
-      gallery.querySelectorAll(".bento-item").forEach(el => {
-        el.addEventListener("click", () => createLightbox(el.dataset.url, el.dataset.name));
-      });
+    galleryEl.appendChild(item);
+  });
+}
 
-    } catch (err) {
-      console.error(err);
-      gallery.innerHTML = `<p>Error cargando imágenes.</p>`;
-    }
+/**
+ * Obtiene las últimas imágenes desde Supabase
+ */
+async function loadImages() {
+  try {
+    const { data, error } = await supabase.storage.from("imagenes").list("", {
+      limit: 6,
+      offset: 0,
+      sortBy: { column: "created_at", order: "desc" }
+    });
+
+    if (error) throw error;
+
+    renderGallery(data);
+  } catch (err) {
+    console.error("Error cargando imágenes:", err.message);
+    galleryEl.innerHTML = `<p style="color:red; text-align:center;">❌ Error cargando imágenes</p>`;
   }
+}
 
-  loadPublicImages();
-
-  // realtime new images
-  supabase
-    .channel("imagenes-changes")
-    .on(
-      "postgres_changes",
-      { event: "INSERT", schema: "public", table: "imagenes" },
-      (payload) => {
-        const img = payload.new;
-        const el = document.createElement("div");
-        el.className = "bento-item";
-        el.innerHTML = `<img src="${img.url}" alt="${img.name || "Imagen"}" loading="lazy">`;
-        el.addEventListener("click", () => createLightbox(img.url, img.name || ""));
-        gallery.prepend(el);
-      }
-    )
-    .subscribe();
-});
+// 🚀 Llama a la carga al iniciar
+loadImages();
