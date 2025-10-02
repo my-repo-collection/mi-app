@@ -36,10 +36,12 @@ document.addEventListener("DOMContentLoaded", () => {
     gallery.innerHTML = `<p>Cargando...</p>`;
     try {
       let q = supabase.from("imagenes")
-        .select("id, url, name, titulo, created_at, fecha, descripcion, tema")
+        .select("id, url, name, created_at, tema, path, user_id")
         .order("created_at", { ascending: false });
 
-      if (query) q = q.ilike("name", `%${query}%`).ilike("titulo", `%${query}%`);
+      if (query) {
+        q = q.ilike("name", `%${query}%`);
+      }
 
       const { data, error } = await q;
       if (error) throw error;
@@ -50,15 +52,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       gallery.innerHTML = data.map(img => {
-        const nombre = img.name || img.titulo || "Sin título";
-        const fecha = img.created_at || img.fecha;
+        const nombre = img.name || "Imagen sin título";
+        const fecha = img.created_at ? new Date(img.created_at).toLocaleDateString() : "";
         return `
           <div class="bento-item" data-url="${img.url}" data-name="${nombre}">
             <img src="${img.url}" alt="${nombre}" loading="lazy">
             <div class="info">
               <h3>${nombre}</h3>
-              <p>${img.descripcion || ""}</p>
-              <p>📅 ${fecha ? new Date(fecha).toLocaleDateString() : ""}</p>
+              <p>${img.tema || ""}</p>
+              <p>📅 ${fecha}</p>
             </div>
           </div>
         `;

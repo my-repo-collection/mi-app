@@ -8,21 +8,21 @@ function renderGallery(imagenes) {
   galleryEl.innerHTML = "";
 
   if (!imagenes || imagenes.length === 0) {
-    galleryEl.innerHTML = `<p style="text-align:center; color:#666;">No hay imágenes disponibles aún 📭</p>`;
+    galleryEl.innerHTML = `<p style="text-align:center; color:#666;">No hay imágenes disponibles 📭</p>`;
     return;
   }
 
   imagenes.forEach(img => {
-    const nombre = img.name || img.titulo || "Imagen sin título";
-    const fecha = img.created_at || img.fecha;
+    const nombre = img.name || "Imagen sin título";
+    const fecha = img.created_at ? new Date(img.created_at).toLocaleDateString() : "";
 
     const item = document.createElement("div");
     item.className = "bento-item";
     item.innerHTML = `
-      <img src="${img.url}" alt="${nombre.replace(/"/g,'')}" loading="lazy">
+      <img src="${img.url}" alt="${nombre}" loading="lazy">
       <div class="info">
         <h3>${nombre}</h3>
-        <p>📅 ${fecha ? new Date(fecha).toLocaleDateString() : ""}</p>
+        <p>📅 ${fecha}</p>
       </div>
     `;
 
@@ -58,12 +58,15 @@ async function loadImages() {
   try {
     const { data, error } = await supabase
       .from("imagenes")
-      .select("id, url, name, titulo, created_at, fecha")
+      .select("id, url, name, created_at, tema, path, user_id")
       .order("created_at", { ascending: false })
       .limit(6);
 
     if (error) throw error;
-    renderGallery(data || []);
+    renderGallery((data || []).map(img => ({
+      ...img,
+      name: img.name || "Imagen sin título"
+    })));
   } catch (err) {
     console.error("Error cargando imágenes:", err);
     galleryEl.innerHTML = `<p style="color:red; text-align:center;">❌ Error cargando imágenes</p>`;

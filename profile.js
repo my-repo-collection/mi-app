@@ -178,12 +178,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const { data: images, error } = await supabase
         .from("imagenes")
-        .select("id, url, name, titulo, created_at, fecha, descripcion, tema, path")
+        .select("id, url, name, created_at, tema, path, user_id")
         .eq("user_id", idBuscado)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      renderGallery(images || []);
+      renderGallery((images || []).map(img => ({
+        ...img,
+        name: img.name || "Imagen sin título"
+      })));
     } catch (err) {
       console.error("Error cargando galería:", err);
       gallery.innerHTML = "<p>Error cargando galería.</p>";
@@ -200,8 +203,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     images.forEach((img) => {
-      const nombre = img.name || img.titulo || "Sin título";
-      const fecha = img.created_at || img.fecha;
+      const nombre = img.name || "Imagen sin título";
+      const fecha = img.created_at ? new Date(img.created_at).toLocaleDateString() : "";
 
       const card = document.createElement("div");
       card.className = "image-card";
@@ -214,7 +217,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       card.appendChild(imageEl);
 
-      // Acciones solo para dueño
       if (esDueno) {
         const actions = document.createElement("div");
         actions.className = "image-actions";
@@ -247,13 +249,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         card.appendChild(actions);
       }
 
-      // Info adicional
       const info = document.createElement("div");
       info.className = "image-info";
       info.innerHTML = `
         <h4>${nombre}</h4>
-        <p>${img.descripcion || ""}</p>
-        <p>${fecha ? "📅 " + new Date(fecha).toLocaleDateString() : ""}</p>
+        <p>${img.tema || ""}</p>
+        <p>${fecha ? "📅 " + fecha : ""}</p>
       `;
       card.appendChild(info);
 
@@ -278,7 +279,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (uploadError) throw uploadError;
         const { data } = supabase.storage.from("imagenes").getPublicUrl(newPath);
         const publicUrl = data?.publicUrl;
-        await supabase.from("imagenes").update({ url: publicUrl, path: newPath, name: file.name }).eq("id", imgRow.id);
+        await supabase.from("imagenes").update({
+          url: publicUrl,
+          path: newPath,
+          name: file.name
+        }).eq("id", imgRow.id);
         if (imgRow.path) {
           await supabase.storage.from("imagenes").remove([imgRow.path]).catch(() => {});
         }
@@ -310,7 +315,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (uploadError) throw uploadError;
         const { data } = supabase.storage.from("imagenes").getPublicUrl(filePath);
         const publicUrl = data?.publicUrl;
-        await supabase.from("imagenes").insert([{ user_id: user.id, url: publicUrl, path: filePath, name: file.name }]);
+        await supabase.from("imagenes").insert([{
+          user_id: user.id,
+          url: publicUrl,
+          path: filePath,
+          name: file.name
+        }]);
         fileInput.value = "";
         await refreshGallery();
         showToast("Imagen subida", "success");
