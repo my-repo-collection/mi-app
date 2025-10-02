@@ -23,39 +23,35 @@
     </header>
 
     <main class="profile-container">
-        <div class="profile-card">
+        <div class="profile-card public-mode" id="profile-card">
             <!-- Avatar -->
             <div class="avatar-wrapper">
                 <img id="avatar" src="" alt="Avatar" class="avatar-img" />
-                <button id="change-avatar" class="icon-btn" title="Cambiar foto">
-                    <i class="fa fa-camera"></i>
-                </button>
-                <input type="file" id="avatar-input" accept="image/*" hidden>
             </div>
 
             <!-- Nombre -->
             <div class="name-wrapper">
                 <h1 id="user-name">Nombre del usuario</h1>
-                <button id="edit-name" class="icon-btn" title="Editar nombre">
-                    <i class="fa fa-pencil"></i>
-                </button>
-                <input type="text" id="name-input" class="hidden">
             </div>
 
             <!-- Bio -->
             <div class="bio-wrapper">
                 <h2>Sobre mí</h2>
-                <p id="user-bio">Aquí el usuario puede escribir sobre sí mismo.</p>
-                <textarea id="bio-input" class="hidden"></textarea>
-                <button id="edit-bio" class="icon-btn" title="Editar bio">
-                    <i class="fa fa-pencil"></i>
-                </button>
+                <p id="user-bio">Este usuario aún no escribió nada.</p>
+            </div>
+
+            <!-- Galería pública -->
+            <div class="gallery-section">
+                <h2>Galería</h2>
+                <div class="bento-gallery" id="profile-gallery">
+                    <!-- imágenes del usuario -->
+                </div>
             </div>
         </div>
     </main>
 
     <footer>
-        <p>© 2025 Mi Galería · Perfil de usuario</p>
+        <p>© 2025 Mi Galería · Perfil público</p>
     </footer>
 
     <script type="module" src="profile.js"></script>
