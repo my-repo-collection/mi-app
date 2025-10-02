@@ -6,10 +6,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = "login.html";
     return;
   }
-
   const userId = user.id;
 
-  // Elementos
+  // Elementos del DOM
   const avatarEl = document.getElementById("avatar");
   const avatarInput = document.getElementById("avatarInput");
   const editAvatarBtn = document.getElementById("editAvatarBtn");
@@ -27,10 +26,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const gallery = document.getElementById("profileGallery");
   const uploadBtn = document.getElementById("uploadImageBtn");
   const imageInput = document.getElementById("imageInput");
+  const imageTitle = document.getElementById("imageTitle");
+  const imageTema = document.getElementById("imageTema");
 
   const logoutBtn = document.getElementById("logout");
 
-  // 📌 Cargar perfil
+  // Cargar perfil
   const { data: perfil } = await supabase
     .from("usuarios")
     .select("name, bio, avatar_url")
@@ -43,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (perfil.avatar_url) avatarEl.src = perfil.avatar_url;
   }
 
-  // 🖼️ Cambiar avatar
+  // Cambiar avatar
   editAvatarBtn.addEventListener("click", () => avatarInput.click());
 
   avatarInput.addEventListener("change", async () => {
@@ -55,55 +56,45 @@ document.addEventListener("DOMContentLoaded", async () => {
       .from("avatars")
       .upload(fileName, file, { upsert: true });
 
-    if (uploadError) {
-      console.error(uploadError);
-      return;
+    if (!uploadError) {
+      const { data: publicUrlData } = supabase
+        .storage
+        .from("avatars")
+        .getPublicUrl(fileName);
+
+      const avatarUrl = publicUrlData.publicUrl;
+      avatarEl.src = avatarUrl;
+
+      await supabase.from("usuarios").update({ avatar_url: avatarUrl }).eq("id", userId);
     }
-
-    const { data: publicUrlData } = supabase
-      .storage
-      .from("avatars")
-      .getPublicUrl(fileName);
-
-    const avatarUrl = publicUrlData.publicUrl;
-
-    avatarEl.src = avatarUrl;
-    await supabase.from("usuarios").update({ avatar_url: avatarUrl }).eq("id", userId);
   });
 
-  // ✏️ Editar nombre
-  editNameBtn.addEventListener("click", () => {
-    nameInput.value = nameEl.textContent;
-    nameEl.style.display = "none";
-    nameInput.style.display = "block";
-    saveNameBtn.style.display = "inline-block";
-  });
-
+  // Editar nombre
+  editNameBtn.addEventListener("click", () => toggleField(nameEl, nameInput, saveNameBtn, true));
   saveNameBtn.addEventListener("click", async () => {
     await supabase.from("usuarios").update({ name: nameInput.value }).eq("id", userId);
     nameEl.textContent = nameInput.value;
-    nameEl.style.display = "block";
-    nameInput.style.display = "none";
-    saveNameBtn.style.display = "none";
+    toggleField(nameEl, nameInput, saveNameBtn, false);
   });
 
-  // 📝 Editar bio
-  editBioBtn.addEventListener("click", () => {
-    bioInput.value = bioEl.textContent;
-    bioEl.style.display = "none";
-    bioInput.style.display = "block";
-    saveBioBtn.style.display = "inline-block";
-  });
-
+  // Editar bio
+  editBioBtn.addEventListener("click", () => toggleField(bioEl, bioInput, saveBioBtn, true));
   saveBioBtn.addEventListener("click", async () => {
     await supabase.from("usuarios").update({ bio: bioInput.value }).eq("id", userId);
     bioEl.textContent = bioInput.value;
-    bioEl.style.display = "block";
-    bioInput.style.display = "none";
-    saveBioBtn.style.display = "none";
+    toggleField(bioEl, bioInput, saveBioBtn, false);
   });
 
-  // 📤 Subir imágenes a galería personal
+  function toggleField(textEl, inputEl, btnEl, editMode) {
+    if (editMode) {
+      inputEl.value = textEl.textContent;
+    }
+    textEl.style.display = editMode ? "none" : "block";
+    inputEl.style.display = editMode ? "block" : "none";
+    btnEl.style.display = editMode ? "inline-block" : "none";
+  }
+
+  // Subir imágenes
   uploadBtn.addEventListener("click", () => imageInput.click());
 
   imageInput.addEventListener("change", async (e) => {
@@ -115,53 +106,89 @@ document.addEventListener("DOMContentLoaded", async () => {
       .from("imagenes")
       .upload(fileName, file);
 
-    if (uploadError) {
-      console.error(uploadError);
-      return;
+    if (!uploadError) {
+      const { data: publicUrlData } = supabase.storage
+        .from("imagenes")
+        .getPublicUrl(fileName);
+
+      await supabase.from("imagenes").insert({
+        user_id: userId,
+        url: publicUrlData.publicUrl,
+        name: imageTitle.value || file.name,
+        tema: imageTema.value || null
+      });
+
+      imageTitle.value = "";
+      imageTema.value = "";
+      loadImages();
     }
-
-    const { data: publicUrlData } = supabase
-      .storage
-      .from("imagenes")
-      .getPublicUrl(fileName);
-
-    const { error: insertError } = await supabase.from("imagenes").insert({
-      user_id: userId,
-      url: publicUrlData.publicUrl,
-      name: file.name,
-    });
-
-    if (insertError) {
-      console.error(insertError);
-    }
-
-    loadImages();
   });
 
-  // 🖼️ Cargar imágenes del perfil
+  // Cargar galería
   async function loadImages() {
     const { data } = await supabase
       .from("imagenes")
-      .select("url, name")
+      .select("id, url, name, tema")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
     gallery.innerHTML = "";
     if (data && data.length > 0) {
       data.forEach((img) => {
-        const el = document.createElement("img");
-        el.src = img.url;
-        el.alt = img.name;
-        gallery.appendChild(el);
+        const wrapper = document.createElement("div");
+        wrapper.className = "bento-item";
+        wrapper.innerHTML = `
+          <img src="${img.url}" alt="${img.name}">
+          <p>${img.name || "Sin título"} ${img.tema ? `· ${img.tema}` : ""}</p>
+          <button class="btn small reupload" data-id="${img.id}">Resubir</button>
+          <button class="btn small btn-danger delete" data-id="${img.id}">Borrar</button>
+        `;
+        gallery.appendChild(wrapper);
       });
     } else {
       gallery.innerHTML = "<p>No hay imágenes en este perfil.</p>";
     }
   }
 
+  gallery.addEventListener("click", async (e) => {
+    const id = e.target.dataset.id;
+    if (!id) return;
+
+    if (e.target.classList.contains("delete")) {
+      await supabase.from("imagenes").delete().eq("id", id);
+      loadImages();
+    }
+
+    if (e.target.classList.contains("reupload")) {
+      imageInput.click();
+      imageInput.onchange = async () => {
+        const file = imageInput.files[0];
+        if (!file) return;
+
+        const fileName = `img-${userId}-${Date.now()}-${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("imagenes")
+          .upload(fileName, file, { upsert: true });
+
+        if (!uploadError) {
+          const { data: publicUrlData } = supabase.storage
+            .from("imagenes")
+            .getPublicUrl(fileName);
+
+          await supabase.from("imagenes").update({
+            url: publicUrlData.publicUrl,
+            name: file.name
+          }).eq("id", id);
+
+          loadImages();
+        }
+      };
+    }
+  });
+
   loadImages();
 
-  // 🚪 Logout
+  // Logout
   logoutBtn.addEventListener("click", async () => {
     await supabase.auth.signOut();
     window.location.href = "login.html";
