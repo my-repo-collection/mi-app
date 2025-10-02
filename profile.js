@@ -121,3 +121,63 @@ function deleteImage(id) {
 function replaceImage(id) {
   console.log("Reemplazar imagen:", id);
 }
+
+
+// --- Guardar cambios de perfil ---
+const editForm = document.getElementById("editProfileForm");
+if (editForm) {
+  editForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("nameInput").value.trim();
+    const bio = document.getElementById("bioInput").value.trim();
+    const file = document.getElementById("avatarInput").files[0];
+
+    let avatarUrl = profile.avatar_url;
+
+    // 1. Si subió nueva foto de perfil
+    if (file) {
+      const filePath = `avatars/${user.id}-${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        console.error("❌ Error subiendo avatar:", uploadError.message);
+        alert("Error subiendo la foto de perfil");
+        return;
+      }
+
+      // Obtener URL pública
+      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      avatarUrl = data.publicUrl;
+    }
+
+    // 2. Actualizar la tabla usuarios
+    const { error: updateError } = await supabase
+      .from("usuarios")
+      .update({
+        name,
+        bio,
+        avatar_url: avatarUrl,
+      })
+      .eq("id", user.id);
+
+    if (updateError) {
+      console.error("❌ Error actualizando perfil:", updateError.message);
+      alert("No se pudo actualizar el perfil.");
+    } else {
+      alert("✅ Perfil actualizado con éxito");
+      location.reload();
+    }
+  });
+}
+
+// --- Botón de mostrar formulario ---
+const editToggleBtn = document.getElementById("editToggleBtn");
+if (editToggleBtn) {
+  editToggleBtn.addEventListener("click", () => {
+    const form = document.getElementById("editProfileForm");
+    form.style.display = form.style.display === "none" ? "block" : "none";
+  });
+}
