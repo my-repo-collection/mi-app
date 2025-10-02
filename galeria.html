@@ -2,30 +2,29 @@
 <html lang="es">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Explorar | Mi App</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Explorar | Mi Galería</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 </head>
 
 <body>
   <header>
-    <div class="logo">📸 Mi Galería</div>
+    <div class="logo">📷 Mi Galería</div>
     <nav>
       <ul>
         <li><a href="index.html">Inicio</a></li>
+        <li><a href="galeria.html" class="active">Explorar</a></li>
         <li><a href="login.html" id="loginNav">Login</a></li>
         <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
-        <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
+        <li><button id="logoutBtn" style="display:none;">🔒 Cerrar sesión</button></li>
       </ul>
     </nav>
   </header>
 
   <main class="container">
-    <h1 class="section-title">🔎 Explorar imágenes</h1>
+    <h1 class="section-title">🔍 Explorar imágenes</h1>
     <input type="text" id="searchBar" class="search-bar" placeholder="Buscar por título, tema o usuario...">
-
-    <!-- Cambié bento-gallery -> bento-grid -->
     <section class="bento-grid" id="explore-gallery"></section>
   </main>
 
@@ -33,8 +32,12 @@
     <p>© 2025 Mi Galería · Explorar</p>
   </footer>
 
-  <script type="module" src="galeria.js"></script>
+  <div id="toast-container"></div>
+
+  <script type="module" src="config.js"></script>
+  <script type="module" src="utils.js"></script>
   <script type="module" src="header.js"></script>
+  <script type="module" src="galeria.js"></script>
 </body>
 
 </html>

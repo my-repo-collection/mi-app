@@ -2,6 +2,7 @@
 import { supabase } from "./config.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Some providers return tokens in the hash after redirect
   const hash = window.location.hash.substring(1);
   if (!hash) return;
 
@@ -19,7 +20,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error("❌ Error al establecer sesión:", error.message);
       alert("Hubo un error confirmando tu cuenta: " + error.message);
     } else {
-      console.log("✅ Sesión restaurada desde URL");
       // Redirigir al perfil
       window.location.href = "profile.html";
     }

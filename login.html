@@ -2,27 +2,27 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Login | Mi App</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Login | Mi Galería</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 </head>
 
 <body>
     <header>
-        <div class="logo">📸 Mi Galería</div>
+        <div class="logo">📷 Mi Galería</div>
         <nav>
             <ul>
                 <li><a href="index.html">Inicio</a></li>
-                <li><a href="login.html" id="loginNav">Login</a></li>
+                <li><a href="login.html" id="loginNav" class="active">Login</a></li>
                 <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
-                <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
+                <li><button id="logoutBtn" style="display:none;">🔒 Cerrar sesión</button></li>
             </ul>
         </nav>
     </header>
 
     <main class="auth-container">
-        <h1>🔑 Iniciar sesión</h1>
+        <h1>🔐 Iniciar sesión</h1>
         <form id="loginForm" class="form">
             <label>Correo
                 <input type="email" id="email" placeholder="ejemplo@mail.com" required>
@@ -46,8 +46,12 @@
         <p>© 2025 Mi Galería</p>
     </footer>
 
-    <script type="module" src="login.js"></script>
+    <div id="toast-container"></div>
+
+    <script type="module" src="config.js"></script>
+    <script type="module" src="utils.js"></script>
     <script type="module" src="header.js"></script>
+    <script type="module" src="login.js"></script>
 </body>
 
 </html>

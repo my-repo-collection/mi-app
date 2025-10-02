@@ -1,9 +1,12 @@
 // profile.js
 import { supabase } from "./config.js";
+import { resizeImage, showToast } from "./utils.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
   const perfilIdParam = params.get("id");
+
+  // Get current user session
   const { data: sessionResp } = await supabase.auth.getUser();
   const user = sessionResp?.user ?? null;
   if (!user && !perfilIdParam) return (window.location.href = "login.html");
@@ -13,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let currentProfile;
 
-  // --- Obtener perfil
+  // --- Obtener perfil desde tabla usuarios
   try {
     const { data, error } = await supabase
       .from("usuarios")
@@ -57,9 +60,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // --- Helpers
+  // Lightbox helper
   function createLightbox(url, filename = "") {
-    // Prevent duplicate
     if (document.getElementById("lightbox-overlay")) return;
     const overlay = document.createElement("div");
     overlay.id = "lightbox-overlay";
@@ -108,35 +110,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.body.appendChild(overlay);
   }
 
-  // Resize helper (returns a File)
-  async function resizeImage(file, maxSize = 1200) {
-    return new Promise((resolve) => {
-      const img = document.createElement("img");
-      const canvas = document.createElement("canvas");
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        img.onload = () => {
-          const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
-          canvas.width = Math.round(img.width * scale);
-          canvas.height = Math.round(img.height * scale);
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob(
-            (blob) => {
-              const resizedFile = new File([blob], file.name, { type: file.type });
-              resolve(resizedFile);
-            },
-            file.type,
-            0.9
-          );
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  // --- Editar perfil (avatar + cover)
+  // --- Edit profile
   const editForm = document.getElementById("editProfileForm");
   if (esDueno && editForm) {
     document.getElementById("nameInput").value = currentProfile.name || "";
@@ -149,7 +123,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     editForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      // Values
       const newName = document.getElementById("nameInput").value.trim();
       const newBio = document.getElementById("bioInput").value.trim();
 
@@ -161,19 +134,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         const avatarFileRaw = document.getElementById("avatarInput")?.files?.[0];
         if (avatarFileRaw) {
           const avatarFile = await resizeImage(avatarFileRaw, 600);
-          const ext = avatarFile.name.split(".").pop();
           const cleanName = avatarFile.name.replace(/\s+/g, "_");
           const filePath = `${user.id}/avatar-${Date.now()}-${cleanName}`;
-          const { error: uploadError } = await supabase.storage
-            .from("avatars")
-            .upload(filePath, avatarFile, { upsert: true });
+          const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, avatarFile, { upsert: true });
           if (uploadError) throw uploadError;
           const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
           avatarUrl = data?.publicUrl;
         }
       } catch (err) {
         console.error("Error subiendo avatar:", err);
-        alert("Error subiendo avatar: " + err.message);
+        showToast("Error subiendo avatar", "error");
         return;
       }
 
@@ -184,16 +154,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           const coverFile = await resizeImage(coverFileRaw, 1800);
           const cleanName = coverFile.name.replace(/\s+/g, "_");
           const filePath = `${user.id}/cover-${Date.now()}-${cleanName}`;
-          const { error: uploadError } = await supabase.storage
-            .from("avatars")
-            .upload(filePath, coverFile, { upsert: true });
+          const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, coverFile, { upsert: true });
           if (uploadError) throw uploadError;
           const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
           coverUrl = data?.publicUrl;
         }
       } catch (err) {
         console.error("Error subiendo portada:", err);
-        alert("Error subiendo portada: " + err.message);
+        showToast("Error subiendo portada", "error");
         return;
       }
 
@@ -210,17 +178,16 @@ document.addEventListener("DOMContentLoaded", async () => {
           .eq("id", user.id);
 
         if (updateError) throw updateError;
-
-        alert("✅ Perfil actualizado");
-        location.reload();
+        showToast("Perfil actualizado", "success");
+        setTimeout(() => location.reload(), 800);
       } catch (err) {
         console.error("Error guardando perfil:", err);
-        alert("Error guardando perfil: " + (err.message || err));
+        showToast("Error guardando perfil", "error");
       }
     });
   }
 
-  // --- Galería: cargar / render / acciones
+  // --- Gallery
   async function refreshGallery() {
     const gallery = document.getElementById("galleryGrid");
     if (!gallery) return;
@@ -245,6 +212,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error("Error cargando galería:", err);
       const gallery = document.getElementById("galleryGrid");
       if (gallery) gallery.innerHTML = "<p>Error cargando galería.</p>";
+      showToast("Error cargando galería", "error");
     }
   }
 
@@ -274,7 +242,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Eliminar
         const delBtn = document.createElement("button");
-        delBtn.textContent = "🗑 Eliminar";
+        delBtn.textContent = "🗑️ Eliminar";
         delBtn.onclick = async () => {
           if (!confirm("¿Eliminar esta imagen?")) return;
           try {
@@ -285,15 +253,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             const { error: dbErr } = await supabase.from("imagenes").delete().eq("id", img.id);
             if (dbErr) throw dbErr;
             await refreshGallery();
+            showToast("Imagen eliminada", "success");
           } catch (err) {
             console.error("Error eliminando:", err);
-            alert("Error eliminando imagen");
+            showToast("Error eliminando imagen", "error");
           }
         };
 
         // Reemplazar
         const repBtn = document.createElement("button");
-        repBtn.textContent = "♻️ Reemplazar";
+        repBtn.textContent = "🔁 Reemplazar";
         repBtn.onclick = () => handleReplaceImage(img);
 
         actions.appendChild(delBtn);
@@ -325,14 +294,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         // update DB row
         const { error: updateError } = await supabase.from("imagenes").update({ url: publicUrl, path: newPath, name: file.name }).eq("id", imgRow.id);
         if (updateError) throw updateError;
-        // optionally remove old storage file (if you want)
+        // optionally remove old storage file
         if (imgRow.path) {
           await supabase.storage.from("imagenes").remove([imgRow.path]).catch(() => {});
         }
         await refreshGallery();
+        showToast("Imagen reemplazada", "success");
       } catch (err) {
         console.error("Error reemplazando imagen:", err);
-        alert("Error reemplazando imagen");
+        showToast("Error reemplazando imagen", "error");
       }
     };
   }
@@ -345,7 +315,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const fileInput = document.getElementById("imageInput");
       const raw = fileInput?.files?.[0];
       if (!raw) {
-        alert("Selecciona una imagen.");
+        showToast("Selecciona una imagen", "info");
         return;
       }
       try {
@@ -356,13 +326,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (uploadError) throw uploadError;
         const { data } = supabase.storage.from("imagenes").getPublicUrl(filePath);
         const publicUrl = data?.publicUrl;
+        // Insert into table 'imagenes'
         const { error: insertError } = await supabase.from("imagenes").insert([{ user_id: user.id, url: publicUrl, path: filePath, name: file.name }]);
         if (insertError) throw insertError;
         fileInput.value = "";
         await refreshGallery();
+        showToast("Imagen subida", "success");
       } catch (err) {
         console.error("Error subiendo imagen:", err);
-        alert("Error subiendo imagen");
+        showToast("Error subiendo imagen", "error");
       }
     });
   }

@@ -2,21 +2,21 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Nueva contraseña | Mi App</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Nueva contraseña | Mi Galería</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 </head>
 
 <body>
     <header>
-        <div class="logo">📸 Mi Galería</div>
+        <div class="logo">📷 Mi Galería</div>
         <nav>
             <ul>
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="login.html" id="loginNav">Login</a></li>
                 <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
-                <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
+                <li><button id="logoutBtn" style="display:none;">🔒 Cerrar sesión</button></li>
             </ul>
         </nav>
     </header>
@@ -39,21 +39,36 @@
         <p>© 2025 Mi Galería</p>
     </footer>
 
+    <div id="toast-container"></div>
+
+    <script type="module" src="config.js"></script>
+    <script type="module" src="utils.js"></script>
+    <script type="module" src="header.js"></script>
     <script type="module">
         import { supabase } from "./config.js";
+        import { showToast } from "./utils.js";
+
         const form = document.getElementById("confirmForm");
         const msg = document.getElementById("msgBox");
+
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
             const pass1 = document.getElementById("newPassword").value;
             const pass2 = document.getElementById("newPassword2").value;
-            if (pass1 !== pass2) return msg.textContent = "⚠️ Las contraseñas no coinciden.";
-            const { error } = await supabase.auth.updateUser({ password: pass1 });
-            msg.textContent = error ? "❌ " + error.message : "✅ Contraseña actualizada. Redirigiendo...";
-            if (!error) setTimeout(() => window.location.href = "login.html", 2000);
+            if (pass1 !== pass2) return msg.textContent = "✖ Las contraseñas no coinciden.";
+            try {
+                const { error } = await supabase.auth.updateUser({ password: pass1 });
+                if (error) throw error;
+                msg.textContent = "✓ Contraseña actualizada. Redirigiendo...";
+                showToast("Contraseña actualizada", "success");
+                setTimeout(() => window.location.href = "login.html", 1500);
+            } catch (err) {
+                console.error(err);
+                msg.textContent = "✖ " + (err?.message || "Error actualizando contraseña");
+                showToast(err?.message || "Error actualizando contraseña", "error");
+            }
         });
     </script>
-    <script type="module" src="header.js"></script>
 </body>
 
 </html>

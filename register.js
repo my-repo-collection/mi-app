@@ -1,4 +1,6 @@
+// register.js
 import { supabase } from "./config.js";
+import { showToast, validateEmail } from "./utils.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("registerForm");
@@ -20,21 +22,41 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.disabled = true; btn.textContent = "⏳ Creando...";
 
     const email = document.getElementById("regEmail").value.trim();
-    if (pass1.value !== pass2.value) {
-      msg.textContent = "⚠️ Las contraseñas no coinciden";
+    if (!validateEmail(email)) {
+      msg.textContent = "✖ Ingresa un email válido";
       btn.disabled = false; btn.textContent = "Registrarme";
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
-      email, password: pass1.value
-    }, { emailRedirectTo: window.location.origin + "/profile.html" });
-
-    if (error) {
-      msg.textContent = "❌ " + error.message;
-    } else {
-      msg.textContent = "✅ Registro exitoso. Revisa tu email para confirmar.";
+    if (pass1.value !== pass2.value) {
+      msg.textContent = "✖ Las contraseñas no coinciden";
+      btn.disabled = false; btn.textContent = "Registrarme";
+      return;
     }
-    btn.disabled = false; btn.textContent = "Registrarme";
+
+    if (pass1.value.length < 6) {
+      msg.textContent = "✖ La contraseña debe tener al menos 6 caracteres";
+      btn.disabled = false; btn.textContent = "Registrarme";
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password: pass1.value
+      }, {
+        emailRedirectTo: window.location.origin + "/profile.html"
+      });
+
+      if (error) throw error;
+      msg.textContent = "✓ Registro exitoso. Revisa tu email para confirmar.";
+      showToast("Registro creado. Confirma tu email.", "success");
+    } catch (err) {
+      console.error(err);
+      msg.textContent = "✖ " + (err?.message || "Error al registrar.");
+      showToast(err?.message || "Error al registrar", "error");
+    } finally {
+      btn.disabled = false; btn.textContent = "Registrarme";
+    }
   });
 });

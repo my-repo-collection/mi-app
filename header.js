@@ -1,44 +1,37 @@
+// header.js
 import { supabase } from "./config.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Intenta encontrar nav elements en la página (si existen)
   const loginNav = document.getElementById("loginNav");
   const profileNav = document.getElementById("profileNav");
   const logoutBtn = document.getElementById("logoutBtn");
 
-  // Comprobar sesión actual
-  const { data } = await supabase.auth.getSession();
-  const session = data?.session;
-
-  if (session) {
-    // Usuario logueado
-    if (loginNav) loginNav.style.display = "none";
-    if (profileNav) profileNav.style.display = "inline-block";
-    if (logoutBtn) logoutBtn.style.display = "inline-block";
-  } else {
-    // Invitado
-    if (loginNav) loginNav.style.display = "inline-block";
-    if (profileNav) profileNav.style.display = "none";
-    if (logoutBtn) logoutBtn.style.display = "none";
+  // Check session
+  try {
+    const { data } = await supabase.auth.getSession();
+    const session = data?.session;
+    setNav(session ? true : false);
+  } catch (e) {
+    setNav(false);
   }
 
-  // Logout
+  function setNav(logged) {
+    if (loginNav) loginNav.style.display = logged ? "none" : "inline-block";
+    if (profileNav) profileNav.style.display = logged ? "inline-block" : "none";
+    if (logoutBtn) logoutBtn.style.display = logged ? "inline-block" : "none";
+  }
+
   if (logoutBtn) {
     logoutBtn.addEventListener("click", async () => {
       await supabase.auth.signOut();
+      setNav(false);
       window.location.href = "index.html";
     });
   }
 
-  // Listener para cambios de sesión
+  // Listener global
   supabase.auth.onAuthStateChange((event, session) => {
-    if (session) {
-      if (loginNav) loginNav.style.display = "none";
-      if (profileNav) profileNav.style.display = "inline-block";
-      if (logoutBtn) logoutBtn.style.display = "inline-block";
-    } else {
-      if (loginNav) loginNav.style.display = "inline-block";
-      if (profileNav) profileNav.style.display = "none";
-      if (logoutBtn) logoutBtn.style.display = "none";
-    }
+    setNav(session ? true : false);
   });
 });

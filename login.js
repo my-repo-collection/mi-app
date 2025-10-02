@@ -1,4 +1,6 @@
+// login.js
 import { supabase } from "./config.js";
+import { showToast, validateEmail } from "./utils.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
@@ -6,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const togglePass = document.getElementById("togglePassLogin");
   const passInput = document.getElementById("password");
 
-  togglePass.addEventListener("click", () => {
+  togglePass?.addEventListener("click", () => {
     passInput.type = passInput.type === "password" ? "text" : "password";
   });
 
@@ -19,14 +21,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = document.getElementById("email").value.trim();
     const password = passInput.value.trim();
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      errorMsg.textContent = "❌ " + error.message;
+    if (!validateEmail(email)) {
+      errorMsg.textContent = "✖ Ingresa un email válido.";
       btn.disabled = false; btn.textContent = "Entrar";
       return;
     }
 
-    window.location.href = "profile.html";
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+
+      // success
+      showToast("Login correcto", "success", 1500);
+      window.location.href = "profile.html";
+    } catch (err) {
+      console.error(err);
+      const msg = err?.message || "Error al iniciar sesión";
+      errorMsg.textContent = "✖ " + msg;
+      showToast(msg, "error");
+      btn.disabled = false; btn.textContent = "Entrar";
+    }
   });
 });

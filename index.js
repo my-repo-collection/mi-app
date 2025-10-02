@@ -1,17 +1,9 @@
 // index.js
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { supabase } from "./config.js";
+import { showToast } from "./utils.js";
 
-// 🚀 Conecta a tu proyecto Supabase
-const SUPABASE_URL = "https://TU-PROJECT.supabase.co"; // cambia esto
-const SUPABASE_KEY = "TU-API-KEY"; // cambia esto (anon key)
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// Contenedor de la galería
 const galleryEl = document.getElementById("imagenes-list");
 
-/**
- * Renderiza la galería Bento
- */
 function renderGallery(imagenes) {
   galleryEl.innerHTML = "";
 
@@ -23,57 +15,59 @@ function renderGallery(imagenes) {
   imagenes.forEach(img => {
     const item = document.createElement("div");
     item.className = "bento-item";
-
-    // URL pública del archivo
-    const url = supabase.storage.from("imagenes").getPublicUrl(img.name).data.publicUrl;
-
     item.innerHTML = `
-      <img src="${url}" alt="${img.name}">
+      <img src="${img.url}" alt="${(img.name || 'Imagen').replace(/"/g,'')}" loading="lazy">
       <div class="info">
-        <h3>${img.metadata?.title || "Imagen sin título"}</h3>
+        <h3>${img.name || "Imagen sin título"}</h3>
         <p>📅 ${new Date(img.created_at).toLocaleDateString()}</p>
       </div>
     `;
 
-    // opcional: abrir en lightbox al hacer clic
     item.addEventListener("click", () => {
+      // lightbox
       const overlay = document.createElement("div");
       overlay.className = "lightbox-overlay";
       overlay.innerHTML = `
         <div class="lightbox-content">
-          <img class="lightbox-img" src="${url}" alt="${img.name}">
+          <img class="lightbox-img" src="${img.url}" alt="${img.name || ''}">
           <div class="lightbox-actions">
-            <a class="lightbox-download" href="${url}" download>⬇ Descargar</a>
-            <button onclick="this.closest('.lightbox-overlay').remove()">Cerrar ✖</button>
+            <a class="lightbox-download" href="${img.url}" download>⬇ Descargar</a>
+            <button id="closeLightbox">Cerrar ✖</button>
           </div>
         </div>
       `;
       document.body.appendChild(overlay);
+      overlay.querySelector("#closeLightbox").addEventListener("click", () => overlay.remove());
     });
 
     galleryEl.appendChild(item);
   });
 }
 
-/**
- * Obtiene las últimas imágenes desde Supabase
- */
 async function loadImages() {
+  galleryEl.innerHTML = "";
+  // skeletons
+  for (let i = 0; i < 6; i++) {
+    const sk = document.createElement("div");
+    sk.className = "skeleton";
+    sk.style.height = "200px";
+    galleryEl.appendChild(sk);
+  }
+
   try {
-    const { data, error } = await supabase.storage.from("imagenes").list("", {
-      limit: 6,
-      offset: 0,
-      sortBy: { column: "created_at", order: "desc" }
-    });
+    const { data, error } = await supabase
+      .from("imagenes")
+      .select("id, url, name, created_at")
+      .order("created_at", { ascending: false })
+      .limit(6);
 
     if (error) throw error;
-
-    renderGallery(data);
+    renderGallery(data || []);
   } catch (err) {
-    console.error("Error cargando imágenes:", err.message);
+    console.error("Error cargando imágenes:", err);
     galleryEl.innerHTML = `<p style="color:red; text-align:center;">❌ Error cargando imágenes</p>`;
+    showToast("Error cargando imágenes", "error");
   }
 }
 
-// 🚀 Llama a la carga al iniciar
 loadImages();

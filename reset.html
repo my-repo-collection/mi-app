@@ -2,27 +2,27 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Restablecer contraseña | Mi App</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Restablecer contraseña | Mi Galería</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 </head>
 
 <body>
     <header>
-        <div class="logo">📸 Mi Galería</div>
+        <div class="logo">📷 Mi Galería</div>
         <nav>
             <ul>
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="login.html" id="loginNav">Login</a></li>
                 <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
-                <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
+                <li><button id="logoutBtn" style="display:none;">🔒 Cerrar sesión</button></li>
             </ul>
         </nav>
     </header>
 
     <main class="auth-container">
-        <h1>🔄 Restablecer contraseña</h1>
+        <h1>🔁 Restablecer contraseña</h1>
         <form id="resetForm" class="form">
             <label>Correo
                 <input type="email" id="resetEmail" placeholder="ejemplo@mail.com" required>
@@ -36,21 +36,41 @@
         <p>© 2025 Mi Galería</p>
     </footer>
 
+    <div id="toast-container"></div>
+
+    <script type="module" src="config.js"></script>
+    <script type="module" src="utils.js"></script>
+    <script type="module" src="header.js"></script>
     <script type="module">
         import { supabase } from "./config.js";
+        import { showToast, validateEmail } from "./utils.js";
+
         const form = document.getElementById("resetForm");
         const msg = document.getElementById("resetMsg");
+
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
+            msg.textContent = "";
+            const email = document.getElementById("resetEmail").value.trim();
+            if (!validateEmail(email)) {
+                msg.textContent = "✖ Ingresa un correo válido.";
+                return;
+            }
             msg.textContent = "⏳ Enviando...";
-            const email = document.getElementById("resetEmail").value;
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + "/reset-confirm.html"
-            });
-            msg.textContent = error ? "❌ " + error.message : "📧 Revisa tu correo.";
+            try {
+                const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.origin + "/reset-confirm.html"
+                });
+                if (error) throw error;
+                msg.textContent = "📧 Revisa tu correo.";
+                showToast("Revisa tu correo para restablecer contraseña", "success");
+            } catch (err) {
+                console.error(err);
+                msg.textContent = "✖ " + (err?.message || "Error enviando correo");
+                showToast(err?.message || "Error enviando correo", "error");
+            }
         });
     </script>
-    <script type="module" src="header.js"></script>
 </body>
 
 </html>
