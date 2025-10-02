@@ -25,11 +25,26 @@
             <label>Correo
                 <input type="email" id="email" placeholder="ejemplo@mail.com" required>
             </label>
+
             <label>Contraseña
-                <input type="password" id="password" placeholder="Mínimo 6 caracteres" required>
+                <div style="position:relative;">
+                    <input type="password" id="password" placeholder="Mínimo 6 caracteres" required>
+                    <span id="togglePass"
+                        style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">👁️</span>
+                </div>
             </label>
+
+            <label>Confirmar contraseña
+                <div style="position:relative;">
+                    <input type="password" id="password2" placeholder="Repite tu contraseña" required>
+                    <span id="togglePass2"
+                        style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">👁️</span>
+                </div>
+            </label>
+
             <button type="submit">Registrarme</button>
         </form>
+
         <div id="errorMsg" class="msgBox"></div>
         <p class="help-text">
             ¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a>
@@ -41,6 +56,20 @@
     </footer>
 
     <script type="module" src="register.js"></script>
+    <script>
+        // Mostrar/ocultar contraseña
+        const togglePass = document.getElementById("togglePass");
+        const togglePass2 = document.getElementById("togglePass2");
+        const pass1 = document.getElementById("password");
+        const pass2 = document.getElementById("password2");
+
+        togglePass.addEventListener("click", () => {
+            pass1.type = pass1.type === "password" ? "text" : "password";
+        });
+        togglePass2.addEventListener("click", () => {
+            pass2.type = pass2.type === "password" ? "text" : "password";
+        });
+    </script>
 </body>
 
 </html>

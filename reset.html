@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Restablecer contraseña | Mi Galería</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo">📸 Mi Galería</div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="login.html">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="auth-container">
+        <h1>🔄 Restablecer contraseña</h1>
+        <form id="resetForm" class="form">
+            <label>Correo
+                <input type="email" id="resetEmail" placeholder="ejemplo@mail.com" required>
+            </label>
+            <button type="submit">Enviar enlace</button>
+        </form>
+        <div id="resetMsg" class="msgBox"></div>
+    </main>
+
+    <footer>
+        <p>© 2025 Mi Galería</p>
+    </footer>
+
+    <script type="module">
+        import { supabase } from "./config.js";
+
+        const form = document.getElementById("resetForm");
+        const msg = document.getElementById("resetMsg");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("resetEmail").value;
+
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: "https://my-repo-collection.github.io/mi-app/reset-confirm.html"
+            });
+
+            if (error) {
+                msg.textContent = "❌ " + error.message;
+            } else {
+                msg.textContent = "📩 Revisa tu correo para restablecer tu contraseña.";
+            }
+        });
+    </script>
+</body>
+
+</html>
