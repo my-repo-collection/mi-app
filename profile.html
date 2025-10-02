@@ -15,7 +15,7 @@
         <nav>
             <ul>
                 <li><a href="index.html">Inicio</a></li>
-                <li><a href="galeria.html">Galería</a></li>
+                <li><a href="galeria.html">Explorar</a></li>
                 <li><a href="profile.html" class="active">Perfil</a></li>
                 <li><a href="#" id="logout">Salir</a></li>
             </ul>
@@ -24,40 +24,43 @@
 
     <main class="profile-container">
         <div class="profile-card" id="profile-card">
+
             <!-- Avatar -->
             <div class="avatar-wrapper">
                 <img id="avatar" src="" alt="Avatar" class="avatar-img" />
-                <input type="file" id="avatarUpload" style="display:none;" />
-                <button id="editAvatarBtn" class="edit-btn" style="display:none;">
+                <input type="file" id="avatarInput" style="display:none;" />
+                <button id="editAvatarBtn" class="edit-btn">
                     <i class="fa fa-camera"></i> Cambiar foto
                 </button>
             </div>
 
             <!-- Nombre -->
             <div class="name-wrapper">
-                <h1 id="user-name">Nombre del usuario</h1>
-                <input type="text" id="nameEdit" style="display:none;" />
-                <button id="editNameBtn" class="edit-btn" style="display:none;">
+                <h1 id="userName">Nombre del usuario</h1>
+                <input type="text" id="nameInput" style="display:none;" />
+                <button id="editNameBtn" class="edit-btn">
                     <i class="fa fa-pen"></i> Editar nombre
                 </button>
+                <button id="saveNameBtn" class="edit-btn" style="display:none;">Guardar</button>
             </div>
 
             <!-- Bio -->
             <div class="bio-wrapper">
                 <h2>Sobre mí</h2>
-                <p id="user-bio">Este usuario aún no escribió nada.</p>
-                <textarea id="bioEdit" style="display:none;"></textarea>
-                <button id="editBioBtn" class="edit-btn" style="display:none;">
+                <p id="userBio">Este usuario aún no escribió nada.</p>
+                <textarea id="bioInput" style="display:none;"></textarea>
+                <button id="editBioBtn" class="edit-btn">
                     <i class="fa fa-pen"></i> Editar bio
                 </button>
+                <button id="saveBioBtn" class="edit-btn" style="display:none;">Guardar</button>
             </div>
 
             <!-- Galería -->
             <div class="gallery-section">
-                <h2>Galería</h2>
-                <div class="bento-gallery" id="profile-gallery">
-                    <!-- imágenes -->
-                </div>
+                <h2>Mis imágenes</h2>
+                <div class="bento-gallery" id="profileGallery"></div>
+                <button id="uploadImageBtn" class="btn">📤 Subir imagen</button>
+                <input type="file" id="imageInput" accept="image/*" hidden>
             </div>
         </div>
     </main>
