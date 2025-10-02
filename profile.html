@@ -9,16 +9,17 @@
 </head>
 
 <body>
-    <header>
-        <div class="logo">📸 Mi Galería</div>
-        <nav>
-            <ul>
-                <li><a href="index.html">Inicio</a></li>
-                <li><a href="login.html" id="loginNav">Login</a></li>
-                <li><a href="profile.html" id="profileNav">Mi perfil</a></li>
-            </ul>
-        </nav>
-    </header>
+<header>
+    <div class="logo">📸 Mi Galería</div>
+    <nav>
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="login.html" id="loginNav">Login</a></li>
+            <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
+            <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
+        </ul>
+    </nav>
+</header>
 
     <main class="profile-container">
         <!-- Panel de usuario -->
@@ -70,6 +71,7 @@
     </footer>
 
     <script type="module" src="profile.js"></script>
+    <script type="module" src="header.js"></script>
 </body>
 
 </html>
