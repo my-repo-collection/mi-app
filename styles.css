@@ -107,7 +107,7 @@ header nav a:hover {
     text-align: center;
 }
 
-/* ---------------- CARDS / FORMS ---------------- */
+/* ---------------- CARDS ---------------- */
 .card {
     background: #fff;
     padding: 25px;
@@ -118,24 +118,29 @@ header nav a:hover {
     margin: 20px auto;
 }
 
-.form-box label {
+/* ---------------- FORMULARIOS ---------------- */
+.form label {
     display: block;
-    margin-top: 10px;
-    font-size: 14px;
+    margin: 12px 0 6px;
+    text-align: left;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-dark);
 }
 
-.form-box input,
-.form-box textarea {
+.form input,
+.form textarea {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border-radius: 8px;
     border: 1px solid #ccc;
-    margin-top: 6px;
-    font-size: 14px;
+    font-size: 1rem;
+    margin-bottom: 16px;
+    transition: 0.3s;
 }
 
-.form-box input:focus,
-.form-box textarea:focus {
+.form input:focus,
+.form textarea:focus {
     outline: none;
     border-color: var(--accent-2);
     box-shadow: 0 0 5px rgba(37, 117, 252, 0.4);
@@ -145,6 +150,18 @@ header nav a:hover {
     margin-top: 10px;
     min-height: 18px;
     font-size: 14px;
+}
+
+.msgBox.error {
+    color: var(--danger);
+}
+
+.msgBox.success {
+    color: green;
+}
+
+.msgBox.info {
+    color: #333;
 }
 
 /* ---------------- BOTONES ---------------- */
@@ -176,20 +193,35 @@ header nav a:hover {
     background: #c0392b;
 }
 
+/* Estado de carga en botones (login/register) */
+button.btn-loading {
+    background: var(--accent);
+    box-shadow: 0 0 10px rgba(106, 17, 203, 0.6);
+    transform: scale(1.02);
+}
+
+/* ---------------- ICON BUTTONS ---------------- */
 .icon-btn {
     cursor: pointer;
     background: var(--accent-2);
     color: #fff;
     border-radius: 50%;
-    padding: 6px 10px;
-    font-size: 1.1rem;
-    margin-left: 6px;
     border: none;
     transition: 0.3s;
 }
 
 .icon-btn:hover {
     background: var(--accent);
+}
+
+.icon-btn.small {
+    padding: 4px 6px;
+    font-size: 0.9rem;
+}
+
+.icon-btn.large {
+    padding: 6px 10px;
+    font-size: 1.1rem;
 }
 
 /* ---------------- GALERÍA ---------------- */
@@ -313,47 +345,6 @@ footer a:hover {
     color: var(--accent);
 }
 
-.form label {
-    display: block;
-    margin: 12px 0 6px;
-    text-align: left;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-dark);
-}
-
-.form input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 1rem;
-    margin-bottom: 16px;
-    transition: 0.3s;
-}
-
-.form input:focus {
-    outline: none;
-    border-color: var(--accent-2);
-    box-shadow: 0 0 5px rgba(37, 117, 252, 0.4);
-}
-
-.form button {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    background: var(--accent-2);
-    color: #fff;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.form button:hover {
-    background: #1d5edb;
-}
-
 .help-text {
     margin-top: 12px;
     font-size: 0.9rem;
@@ -378,12 +369,6 @@ footer a:hover {
 
 .edit-controls {
     margin-top: 6px;
-}
-
-.icon-btn {
-    font-size: 0.9rem;
-    padding: 4px 6px;
-    margin: 0 2px;
 }
 
 .icon-btn.hidden,
@@ -437,17 +422,4 @@ footer a:hover {
 
 .profile-card.public-mode .gallery-section {
     margin-top: 30px;
-}
-
-/* Botón en estado de login */
-.form button.btn-loading {
-    background: var(--accent);
-    box-shadow: 0 0 8px rgba(106, 17, 203, 0.6);
-    transform: scale(1.02);
-}
-
-button.btn-loading {
-    background: var(--accent);
-    box-shadow: 0 0 10px rgba(106, 17, 203, 0.6);
-    transform: scale(1.02);
 }

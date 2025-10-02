@@ -8,7 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function showMessage(msg, type = "info") {
     msgBox.textContent = msg;
-    msgBox.style.color = type === "error" ? "red" : (type === "success" ? "green" : "#333");
+    msgBox.style.color =
+      type === "error" ? "red" :
+      type === "success" ? "green" : "#333";
   }
 
   if (registerForm) {
@@ -17,7 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const email = document.getElementById("registerEmail").value.trim();
       const password = document.getElementById("registerPassword").value;
 
-      if (!email || !password) return showMessage("Completa todos los campos", "error");
+      if (!email || !password) {
+        return showMessage("Completa todos los campos", "error");
+      }
 
       // feedback inmediato en botón
       registerBtn.disabled = true;
@@ -30,11 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (error) throw error;
         if (!data?.user) throw new Error("No se pudo registrar el usuario");
 
-        // éxito
+        // éxito → feedback + redirigir a perfil
         registerBtn.textContent = "¡Listo!";
-        showMessage("Registro correcto. Redirigiendo al login...", "success");
+        showMessage("Cuenta creada. Redirigiendo al perfil...", "success");
 
-        setTimeout(() => window.location.href = "login.html", 1200);
+        setTimeout(() => {
+          window.location.href = "profile.html";
+        }, 1000);
       } catch (err) {
         console.error(err);
         showMessage(err.message, "error");

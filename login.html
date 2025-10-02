@@ -21,15 +21,16 @@
 
     <main class="auth-container">
         <h1>🔐 Inicia sesión</h1>
-        <form id="login-form" class="form">
+        <form id="loginForm" class="form">
             <label>Correo
-                <input type="email" id="email" placeholder="ejemplo@mail.com" required>
+                <input type="email" id="loginEmail" placeholder="ejemplo@mail.com" required>
             </label>
             <label>Contraseña
-                <input type="password" id="password" placeholder="••••••••" required>
+                <input type="password" id="loginPassword" placeholder="••••••••" required>
             </label>
-            <button type="submit">Entrar</button>
+            <button type="submit" id="loginBtn">Entrar</button>
         </form>
+        <div id="msgBox" class="msg-box"></div>
         <p class="help-text">
             ¿No tienes cuenta? <a href="register.html">Regístrate aquí</a>
         </p>
