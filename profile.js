@@ -2,7 +2,7 @@
 import { supabase } from "./config.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // --- Helpers para mensajes en UI ---
+  // --- Helpers mensajes ---
   function showMsg(text, type = "info") {
     let box = document.getElementById("msgBox");
     if (!box) {
@@ -30,11 +30,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (b) b.textContent = "";
   }
 
-  // --- 1) Detectar si visita otro perfil ---
+  // --- Detectar perfil ---
   const params = new URLSearchParams(window.location.search);
   const perfilIdParam = params.get("id");
 
-  // --- 2) Obtener usuario logueado ---
   const sessionResp = await supabase.auth.getUser();
   const user = sessionResp?.data?.user ?? null;
 
@@ -46,7 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const idBuscado = perfilIdParam || user.id;
   const esDueno = user ? idBuscado === user.id : false;
 
-  // --- 3) Cargar perfil desde DB ---
+  // --- Cargar perfil ---
   let currentProfile = null;
   try {
     const { data: profile, error } = await supabase
@@ -54,7 +53,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       .select("*")
       .eq("id", idBuscado)
       .single();
-
     if (error) throw error;
     currentProfile = profile;
   } catch (err) {
@@ -63,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // --- 4) Renderizar datos ---
+  // --- Render perfil ---
   const userNameEl = document.getElementById("userName");
   const userEmailEl = document.getElementById("userEmail");
   const userBioEl = document.getElementById("userBio");
@@ -76,11 +74,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     avatarPreview.src =
       currentProfile.avatar_url || "https://via.placeholder.com/120";
 
-  // --- 5) Mostrar/ocultar zona de edición ---
+  // --- Mostrar/ocultar edición ---
   const ownerActions = document.getElementById("ownerActions");
   if (ownerActions) ownerActions.style.display = esDueno ? "block" : "none";
 
-  // --- 6) Toggle edición ---
+  // --- Editar perfil ---
   const editToggleBtn = document.getElementById("editToggleBtn");
   const editForm = document.getElementById("editProfileForm");
   const nameInput = document.getElementById("nameInput");
@@ -98,7 +96,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // --- 7) Guardar cambios de perfil ---
   if (esDueno && editForm) {
     editForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -120,7 +117,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
           const ext = file.name.split(".").pop();
           const filePath = `${user.id}/avatar.${ext}`;
-
           const { error: uploadError } = await supabase.storage
             .from("avatars")
             .upload(filePath, file, { upsert: true });
@@ -175,7 +171,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // --- 8) Cargar galería ---
+  // --- Galería ---
   async function refreshGallery() {
     try {
       const { data: images, error: imgError } = await supabase
@@ -193,7 +189,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   await refreshGallery();
 
-  // --- 9) Subir nueva imagen ---
+  // --- Subir nueva imagen ---
   const uploadForm = document.getElementById("uploadForm");
   if (esDueno && uploadForm) {
     uploadForm.addEventListener("submit", async (e) => {
@@ -216,7 +212,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       try {
         const ext = file.name.split(".").pop();
         const filePath = `${user.id}/${Date.now()}.${ext}`;
-
         const { error: uploadError } = await supabase.storage
           .from("imagenes")
           .upload(filePath, file, { upsert: true });
@@ -247,7 +242,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // --- 10) Renderizar galería ---
+  // --- Renderizar galería ---
   function renderGallery(images, esDuenoLocal) {
     const gallery = document.getElementById("galleryGrid");
     if (!gallery) return;
@@ -259,6 +254,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     images.forEach((img) => {
+      // fallback si path viene null
+      let filePath = img.path;
+      if (!filePath && img.url) {
+        filePath = img.url.replace(
+          /^.+\/storage\/v1\/object\/public\/imagenes\//,
+          ""
+        );
+      }
+
       const card = document.createElement("div");
       card.className = "image-card";
 
@@ -273,7 +277,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const delBtn = document.createElement("button");
         delBtn.textContent = "🗑 Eliminar";
-        delBtn.onclick = () => confirmDeleteImage(img.id, img.path);
+        delBtn.onclick = () => confirmDeleteImage(img.id, filePath);
 
         const repBtn = document.createElement("button");
         repBtn.textContent = "♻️ Reemplazar";
@@ -288,7 +292,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // --- 11) Eliminar imagen ---
+  // --- Eliminar imagen ---
   async function confirmDeleteImage(imageId, filePath) {
     if (!confirm("¿Seguro que quieres eliminar esta imagen?")) return;
 
@@ -312,7 +316,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // --- 12) Reemplazar imagen ---
+  // --- Reemplazar imagen ---
   function handleReplaceImage(imageId) {
     const input = document.createElement("input");
     input.type = "file";
