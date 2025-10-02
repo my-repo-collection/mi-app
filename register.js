@@ -1,58 +1,48 @@
-// register.js
+// login.js
 import { supabase } from "./config.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("registerForm");
-  const msgBox = document.getElementById("msgBox");
+  const form = document.getElementById("loginForm");
+  const errorMsg = document.getElementById("errorMsg");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    msgBox.textContent = "";
+    errorMsg.textContent = "";
 
-    const email = document.getElementById("registerEmail").value.trim();
-    const password = document.getElementById("registerPassword").value.trim();
-    const confirmPassword = document.getElementById("registerConfirm").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-    if (password !== confirmPassword) {
-      msgBox.textContent = "❌ Las contraseñas no coinciden.";
-      msgBox.style.color = "red";
-      return;
-    }
-
-    // 1. Crear usuario en auth
-    const { data, error } = await supabase.auth.signUp({
+    // 1. Intentar login
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      console.error("❌ Error registrando:", error.message);
-      msgBox.textContent = "Error: " + error.message;
-      msgBox.style.color = "red";
+      console.error("Error en login:", error.message);
+      errorMsg.textContent = error.message;
       return;
     }
 
-    const user = data.user;
-    console.log("🔑 Nuevo usuario:", user);
+    const { user } = data;
+    console.log("🔑 Sesión iniciada:", user);
 
-    // 2. Crear perfil en tabla usuarios
-    const { error: insertError } = await supabase.from("usuarios").insert([
-      {
-        id: user.id,       // 👈 tiene que coincidir con auth.uid()
-        email: user.email,
-        name: "",
-        avatar_url: "",
-        bio: ""
-      }
-    ]);
+    // 2. Buscar perfil en tabla usuarios
+    const { data: profile, error: profileError } = await supabase
+      .from("usuarios")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-    if (insertError) {
-      console.error("⚠️ Error insertando perfil:", insertError.message);
-      msgBox.textContent = "Cuenta creada, pero error al guardar perfil.";
-      msgBox.style.color = "orange";
-    } else {
-      msgBox.textContent = "✅ Cuenta creada. Revisa tu correo para confirmar.";
-      msgBox.style.color = "green";
+    if (profileError) {
+      console.error("⚠️ Error cargando perfil:", profileError.message);
+      errorMsg.textContent = "Login correcto, pero no se pudo cargar perfil.";
+      return;
     }
+
+    console.log("👤 Perfil cargado:", profile);
+
+    // 3. Redirigir al perfil
+    window.location.href = "profile.html";
   });
 });
