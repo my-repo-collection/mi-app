@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Inicio | Mi App</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 </head>
+
 <body>
   <header>
     <div class="logo">📸 Mi Galería</div>
     <nav>
       <ul>
         <li><a href="index.html" class="active">Inicio</a></li>
-        <li><a href="galeria.html">Galería</a></li>
+        <!-- 🔴 Galería quitado aquí -->
         <li><a href="profile.html">Perfil</a></li>
         <li><a href="login.html">Salir</a></li>
       </ul>
@@ -22,13 +24,14 @@
   <main>
     <section class="hero">
       <h1>👋 Bienvenido a tu espacio creativo</h1>
-      <p>Guarda tus recuerdos, organiza tus fotos y personaliza tu perfil.  
-         Todo en un solo lugar, simple y seguro.</p>
+      <p>Guarda tus recuerdos, organiza tus fotos y personaliza tu perfil.
+        Todo en un solo lugar, simple y seguro.</p>
     </section>
 
     <section>
-      <h2>✨ Tus últimas imágenes</h2>
-      <div class="grid" id="imagenes-list"></div>
+      <h2>✨ Últimas imágenes de todos</h2>
+      <!-- ✅ Ahora usamos la clase bento-gallery -->
+      <div class="bento-gallery" id="imagenes-list"></div>
     </section>
   </main>
 
@@ -38,4 +41,5 @@
 
   <script type="module" src="index.js"></script>
 </body>
+
 </html>
