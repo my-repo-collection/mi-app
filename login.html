@@ -2,47 +2,44 @@
 <html lang="es">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Iniciar Sesión</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Iniciar sesión | Mi App</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js" defer></script>
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="container nav-content">
-            <a href="index.html" class="logo">NSK</a>
-            <ul class="nav-links">
+    <header>
+        <div class="logo">📸 Mi Galería</div>
+        <nav>
+            <ul>
                 <li><a href="index.html">Inicio</a></li>
-                <li><a href="galeria.html">Galería</a></li>
-                <li><a href="login.html" aria-current="page">Login</a></li>
+                <li><a href="register.html">Registro</a></li>
             </ul>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
-    <main class="page-center">
-        <div class="card container">
-            <h1>Iniciar sesión</h1>
-            <form id="loginForm" class="form-box" autocomplete="on">
-                <label for="loginEmail">Email</label>
-                <input id="loginEmail" type="email" placeholder="nombre@ejemplo.com" required>
-
-                <label for="loginPassword">Contraseña</label>
-                <input id="loginPassword" type="password" placeholder="Tu contraseña" required>
-
-                <button id="loginBtn" class="btn">Entrar</button>
-            </form>
-            <div id="msgBox" class="msgBox" role="alert"></div>
-        </div>
+    <main class="auth-container">
+        <h1>🔐 Inicia sesión</h1>
+        <form id="login-form" class="form">
+            <label>Correo
+                <input type="email" id="email" placeholder="ejemplo@mail.com" required>
+            </label>
+            <label>Contraseña
+                <input type="password" id="password" placeholder="••••••••" required>
+            </label>
+            <button type="submit">Entrar</button>
+        </form>
+        <p class="help-text">
+            ¿No tienes cuenta? <a href="register.html">Regístrate aquí</a>
+        </p>
     </main>
 
-    <footer class="footer">
-        <p>© 2025 NSK</p>
+    <footer>
+        <p>© 2025 Mi Galería. Todos los derechos reservados.</p>
     </footer>
 
-    <script src="login.js"></script>
+    <script type="module" src="login.js"></script>
 </body>
 
 </html>

@@ -1,57 +1,41 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NSK - Bienvenid@</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js" defer></script>
+  <meta charset="UTF-8">
+  <title>Inicio | Mi App</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 </head>
-
 <body>
-    <!-- NAVBAR -->
-    <nav class="navbar" role="navigation" aria-label="Principal">
-        <div class="container nav-content">
-            <a href="index.html" class="logo" aria-label="Ir a inicio">NSK</a>
-            <button class="nav-toggle" aria-label="Abrir menú">☰</button>
-            <ul class="nav-links">
-                <li><a href="index.html" aria-current="page">Inicio</a></li>
-                <li><a href="galeria.html">Galería</a></li>
-                <li><a href="login.html">Login</a></li>
-                <li><a href="register.html">Registrarse</a></li>
-            </ul>
-        </div>
+  <header>
+    <div class="logo">📸 Mi Galería</div>
+    <nav>
+      <ul>
+        <li><a href="index.html" class="active">Inicio</a></li>
+        <li><a href="galeria.html">Galería</a></li>
+        <li><a href="profile.html">Perfil</a></li>
+        <li><a href="login.html">Salir</a></li>
+      </ul>
     </nav>
+  </header>
 
-    <!-- HERO -->
-    <header class="hero">
-        <div class="hero-text">
-            <h1>Explora. Comparte. Conecta.</h1>
-            <p>La comunidad visual donde tus imágenes cuentan historias.</p>
-            <a href="galeria.html" class="btn">Ver galería</a>
-        </div>
-    </header>
+  <main>
+    <section class="hero">
+      <h1>👋 Bienvenido a tu espacio creativo</h1>
+      <p>Guarda tus recuerdos, organiza tus fotos y personaliza tu perfil.  
+         Todo en un solo lugar, simple y seguro.</p>
+    </section>
 
-    <!-- PREVIEW GALERÍA -->
-    <main class="container">
-        <h2 class="section-title">Últimas imágenes</h2>
-        <div id="galleryPreview" class="gallery-grid" aria-live="polite"></div>
-    </main>
+    <section>
+      <h2>✨ Tus últimas imágenes</h2>
+      <div class="grid" id="imagenes-list"></div>
+    </section>
+  </main>
 
-    <!-- FOOTER -->
-    <footer class="footer" role="contentinfo">
-        <div class="container">
-            <p>© 2025 NSK. Todos los derechos reservados.</p>
-            <nav aria-label="Enlaces legales">
-                <a href="#">Política de privacidad</a> |
-                <a href="#">Términos de uso</a>
-            </nav>
-        </div>
-    </footer>
+  <footer>
+    <p>Hecho con ❤️ usando Supabase · 2025</p>
+  </footer>
 
-    <script src="index.js"></script>
+  <script type="module" src="index.js"></script>
 </body>
-
 </html>

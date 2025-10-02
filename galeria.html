@@ -3,41 +3,43 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NSK - Galería</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Galería | Mi App</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js" defer></script>
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="container nav-content">
-            <a href="index.html" class="logo">NSK</a>
-            <button class="nav-toggle" aria-label="Abrir menú">☰</button>
-            <ul class="nav-links">
+    <header>
+        <div class="logo">📸 Mi Galería</div>
+        <nav>
+            <ul>
                 <li><a href="index.html">Inicio</a></li>
-                <li><a href="galeria.html" aria-current="page">Galería</a></li>
+                <li><a href="galeria.html" class="active">Galería</a></li>
                 <li><a href="profile.html">Perfil</a></li>
-                <li><a href="login.html">Login</a></li>
+                <li><a href="#" id="logout">Salir</a></li>
             </ul>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
-    <main class="container">
-        <h1>Galería pública</h1>
-        <label for="searchInput" class="sr-only">Buscar imágenes</label>
-        <input type="text" id="searchInput" placeholder="Buscar por tema o usuario..." class="search-bar">
-        <div id="galleryGrid" class="gallery-grid" aria-live="polite"></div>
+    <main>
+        <h1>🖼️ Mi galería</h1>
+        <p>Aquí puedes ver y subir tus imágenes.</p>
+
+        <section>
+            <button id="upload-image-btn">📤 Subir nueva imagen</button>
+            <input type="file" id="image-input" accept="image/*" hidden>
+        </section>
+
+        <section class="gallery-grid" id="galeria-list">
+            <!-- Imágenes desde Supabase -->
+        </section>
     </main>
 
-    <footer class="footer">
-        <div class="container">
-            <p>© 2025 NSK</p>
-        </div>
+    <footer>
+        <p>© 2025 Mi Galería · Tus fotos siempre contigo</p>
     </footer>
 
-    <script src="galeria.js"></script>
+    <script type="module" src="galeria.js"></script>
 </body>
 
 </html>

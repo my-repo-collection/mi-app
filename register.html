@@ -2,46 +2,44 @@
 <html lang="es">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Registro</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Registro | Mi App</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js" defer></script>
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="container nav-content">
-            <a href="index.html" class="logo">NSK</a>
-            <ul class="nav-links">
+    <header>
+        <div class="logo">📸 Mi Galería</div>
+        <nav>
+            <ul>
                 <li><a href="index.html">Inicio</a></li>
-                <li><a href="register.html" aria-current="page">Registrarse</a></li>
+                <li><a href="login.html">Login</a></li>
             </ul>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
-    <main class="page-center">
-        <div class="card container">
-            <h1>Crear cuenta</h1>
-            <form id="registerForm" class="form-box" autocomplete="on">
-                <label for="registerEmail">Email</label>
-                <input id="registerEmail" type="email" placeholder="nombre@ejemplo.com" required>
-
-                <label for="registerPassword">Contraseña</label>
-                <input id="registerPassword" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required>
-
-                <button id="registerBtn" class="btn">Crear cuenta</button>
-            </form>
-            <div id="msgBox" class="msgBox" role="alert"></div>
-        </div>
+    <main class="auth-container">
+        <h1>📝 Crear cuenta</h1>
+        <form id="register-form" class="form">
+            <label>Correo
+                <input type="email" id="email" placeholder="ejemplo@mail.com" required>
+            </label>
+            <label>Contraseña
+                <input type="password" id="password" placeholder="Mínimo 6 caracteres" required>
+            </label>
+            <button type="submit">Registrarme</button>
+        </form>
+        <p class="help-text">
+            ¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a>
+        </p>
     </main>
 
-    <footer class="footer">
-        <p>© 2025 NSK</p>
+    <footer>
+        <p>© 2025 Mi Galería</p>
     </footer>
 
-    <script src="register.js"></script>
+    <script type="module" src="register.js"></script>
 </body>
 
 </html>

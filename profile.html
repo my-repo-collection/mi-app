@@ -3,75 +3,62 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil - NSK</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Perfil | Mi App</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
-    <!-- NAVBAR -->
-    <nav class="navbar" role="navigation" aria-label="Principal">
-        <div class="container nav-content">
-            <a href="index.html" class="logo">NSK</a>
-            <button class="nav-toggle" aria-label="Abrir menú">☰</button>
-            <ul class="nav-links">
+    <header>
+        <div class="logo">📸 Mi Galería</div>
+        <nav>
+            <ul>
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="galeria.html">Galería</a></li>
-                <li><a href="profile.html" aria-current="page">Perfil</a></li>
-                <li><button id="logoutBtn" class="btn btn-danger">Cerrar sesión</button></li>
+                <li><a href="profile.html" class="active">Perfil</a></li>
+                <li><a href="#" id="logout">Salir</a></li>
             </ul>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
-    <!-- PERFIL -->
-    <main class="container profile-container">
-        <h1>Mi perfil</h1>
-
-        <section class="profile-card">
+    <main class="profile-container">
+        <div class="profile-card">
             <!-- Avatar -->
-            <div class="avatar-wrap">
-                <img id="avatarImg" src="https://via.placeholder.com/150" alt="Avatar del usuario" class="avatar">
-                <label for="avatarInput" class="icon-btn" aria-label="Cambiar avatar">📷</label>
-                <input id="avatarInput" type="file" accept="image/*" style="display:none;">
+            <div class="avatar-wrapper">
+                <img id="avatar" src="" alt="Avatar" class="avatar-img" />
+                <button id="change-avatar" class="icon-btn" title="Cambiar foto">
+                    <i class="fa fa-camera"></i>
+                </button>
+                <input type="file" id="avatar-input" accept="image/*" hidden>
             </div>
 
-            <!-- Info usuario -->
-            <div class="profile-info">
-                <p><strong>Email:</strong> <span id="userEmail">—</span></p>
-
-                <div class="editable-field">
-                    <label for="userNameInput">Nombre</label>
-                    <input id="userNameInput" type="text" placeholder="Tu nombre">
-                </div>
-
-                <div class="editable-field">
-                    <label for="userBioInput">Descripción</label>
-                    <textarea id="userBioInput" rows="3" placeholder="Escribe algo sobre ti..."></textarea>
-                </div>
-
-                <button id="saveProfileBtn" class="btn">Guardar cambios</button>
+            <!-- Nombre -->
+            <div class="name-wrapper">
+                <h1 id="user-name">Nombre del usuario</h1>
+                <button id="edit-name" class="icon-btn" title="Editar nombre">
+                    <i class="fa fa-pencil"></i>
+                </button>
+                <input type="text" id="name-input" class="hidden">
             </div>
-        </section>
 
-        <!-- Galería personal -->
-        <section>
-            <h2>Mis imágenes</h2>
-            <div id="userGallery" class="gallery-grid" aria-live="polite"></div>
-        </section>
-
-        <div id="msgBox" class="msgBox" role="alert"></div>
+            <!-- Bio -->
+            <div class="bio-wrapper">
+                <h2>Sobre mí</h2>
+                <p id="user-bio">Aquí el usuario puede escribir sobre sí mismo.</p>
+                <textarea id="bio-input" class="hidden"></textarea>
+                <button id="edit-bio" class="icon-btn" title="Editar bio">
+                    <i class="fa fa-pencil"></i>
+                </button>
+            </div>
+        </div>
     </main>
 
-    <!-- FOOTER -->
-    <footer class="footer" role="contentinfo">
-        <div class="container">
-            <p>© 2025 NSK. Todos los derechos reservados.</p>
-        </div>
+    <footer>
+        <p>© 2025 Mi Galería · Perfil de usuario</p>
     </footer>
 
-    <script src="profile.js"></script>
+    <script type="module" src="profile.js"></script>
 </body>
 
 </html>
