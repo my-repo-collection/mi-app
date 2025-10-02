@@ -9,27 +9,27 @@
 </head>
 
 <body>
-<header>
-  <div class="logo">📸 Mi Galería</div>
-  <nav>
-    <ul>
-      <li><a href="index.html">Inicio</a></li>
-      <li><a href="login.html" id="loginNav">Login</a></li>
-      <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
-      <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
-    </ul>
-  </nav>
-</header>
+  <header>
+    <div class="logo">📸 Mi Galería</div>
+    <nav>
+      <ul id="navLinks">
+        <li><a href="index.html" class="active">Inicio</a></li>
+        <li><a href="galeria.html">Explorar</a></li>
+        <li><a href="login.html" id="loginNav">Login</a></li>
+        <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
+        <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
+      </ul>
+    </nav>
+  </header>
 
   <main>
     <section class="hero">
       <h1>👋 Bienvenido a tu espacio creativo</h1>
-      <p>Guarda tus recuerdos, organiza tus fotos y personaliza tu perfil.
-        Todo en un solo lugar, simple y seguro.</p>
+      <p>Guarda tus recuerdos, organiza tus fotos y personaliza tu perfil.</p>
     </section>
 
     <section>
-      <h2>✨ Últimas imágenes de todos</h2>
+      <h2>✨ Últimas imágenes</h2>
       <div class="bento-gallery" id="imagenes-list"></div>
     </section>
   </main>
@@ -39,36 +39,8 @@
   </footer>
 
   <script type="module" src="index.js"></script>
-  <script type="module">
-    import { supabase } from "./config.js";
-
-    async function renderNavbar() {
-      const nav = document.getElementById("navLinks");
-      const { data } = await supabase.auth.getUser();
-
-      if (data?.user) {
-        nav.innerHTML = `
-          <li><a href="index.html" class="active">Inicio</a></li>
-          <li><a href="galeria.html">Explorar</a></li>
-          <li><a href="profile.html">Perfil</a></li>
-          <li><a href="#" id="logout">Salir</a></li>
-        `;
-        document.getElementById("logout").addEventListener("click", async () => {
-          await supabase.auth.signOut();
-          window.location.href = "login.html";
-        });
-      } else {
-        nav.innerHTML = `
-          <li><a href="index.html" class="active">Inicio</a></li>
-          <li><a href="login.html">Login</a></li>
-          <li><a href="register.html">Registro</a></li>
-        `;
-      }
-    }
-    renderNavbar();
-  </script>
-  <script type="module" src="auth-redirect.js"></script>
   <script type="module" src="header.js"></script>
+  <script type="module" src="auth-redirect.js"></script>
 </body>
 
 </html>

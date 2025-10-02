@@ -9,28 +9,22 @@
 </head>
 
 <body>
-<header>
-  <div class="logo">📸 Mi Galería</div>
-  <nav>
-    <ul>
-      <li><a href="index.html">Inicio</a></li>
-      <li><a href="login.html" id="loginNav">Login</a></li>
-      <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
-      <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
-    </ul>
-  </nav>
-</header>
+  <header>
+    <div class="logo">📸 Mi Galería</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="login.html" id="loginNav">Login</a></li>
+        <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
+        <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
+      </ul>
+    </nav>
+  </header>
 
   <main class="container">
     <h1 class="section-title">🔎 Explorar imágenes</h1>
-
-    <!-- Buscador -->
     <input type="text" id="searchBar" class="search-bar" placeholder="Buscar por título, tema o usuario...">
-
-    <!-- Resultados -->
-    <section class="bento-gallery" id="explore-gallery">
-      <!-- Se llena dinámicamente -->
-    </section>
+    <section class="bento-gallery" id="explore-gallery"></section>
   </main>
 
   <footer>

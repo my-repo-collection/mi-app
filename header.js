@@ -1,4 +1,3 @@
-// header.js
 import { supabase } from "./config.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -6,32 +5,40 @@ document.addEventListener("DOMContentLoaded", async () => {
   const profileNav = document.getElementById("profileNav");
   const logoutBtn = document.getElementById("logoutBtn");
 
-  const { data: { user }, error } = await supabase.auth.getUser();
+  // Comprobar sesión actual
+  const { data } = await supabase.auth.getSession();
+  const session = data?.session;
 
-  if (error) {
-    console.error("❌ Error al obtener sesión:", error.message);
-  }
-
-  if (user) {
-    // Usuario logueado → ocultar "Login", mostrar "Mi perfil" y "Cerrar sesión"
+  if (session) {
+    // Usuario logueado
     if (loginNav) loginNav.style.display = "none";
-    if (profileNav) profileNav.style.display = "inline";
-    if (logoutBtn) logoutBtn.style.display = "inline";
-
-    if (logoutBtn) {
-      logoutBtn.addEventListener("click", async () => {
-        const { error: logoutError } = await supabase.auth.signOut();
-        if (logoutError) {
-          console.error("❌ Error cerrando sesión:", logoutError.message);
-        } else {
-          window.location.href = "index.html";
-        }
-      });
-    }
+    if (profileNav) profileNav.style.display = "inline-block";
+    if (logoutBtn) logoutBtn.style.display = "inline-block";
   } else {
-    // Usuario NO logueado → mostrar "Login", ocultar "Mi perfil" y "Cerrar sesión"
-    if (loginNav) loginNav.style.display = "inline";
+    // Invitado
+    if (loginNav) loginNav.style.display = "inline-block";
     if (profileNav) profileNav.style.display = "none";
     if (logoutBtn) logoutBtn.style.display = "none";
   }
+
+  // Logout
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      window.location.href = "index.html";
+    });
+  }
+
+  // Listener para cambios de sesión
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (session) {
+      if (loginNav) loginNav.style.display = "none";
+      if (profileNav) profileNav.style.display = "inline-block";
+      if (logoutBtn) logoutBtn.style.display = "inline-block";
+    } else {
+      if (loginNav) loginNav.style.display = "inline-block";
+      if (profileNav) profileNav.style.display = "none";
+      if (logoutBtn) logoutBtn.style.display = "none";
+    }
+  });
 });

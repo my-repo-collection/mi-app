@@ -3,44 +3,34 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Nueva contraseña | Mi Galería</title>
+    <title>Nueva contraseña | Mi App</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 </head>
 
 <body>
-<header>
-    <div class="logo">📸 Mi Galería</div>
-    <nav>
-        <ul>
-            <li><a href="index.html">Inicio</a></li>
-            <li><a href="login.html" id="loginNav">Login</a></li>
-            <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
-            <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
-        </ul>
-    </nav>
-</header>
+    <header>
+        <div class="logo">📸 Mi Galería</div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="login.html" id="loginNav">Login</a></li>
+                <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
+                <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
+            </ul>
+        </nav>
+    </header>
 
     <main class="auth-container">
-        <h1>🔒 Nueva contraseña</h1>
+        <h1>🔑 Nueva contraseña</h1>
         <form id="confirmForm" class="form">
             <label>Nueva contraseña
-                <div style="position:relative;">
-                    <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres" required>
-                    <span id="toggleNewPass"
-                        style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">👁️</span>
-                </div>
+                <input type="password" id="newPassword" required>
             </label>
-
             <label>Confirmar contraseña
-                <div style="position:relative;">
-                    <input type="password" id="newPassword2" placeholder="Repite tu contraseña" required>
-                    <span id="toggleNewPass2"
-                        style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">👁️</span>
-                </div>
+                <input type="password" id="newPassword2" required>
             </label>
-
-            <button type="submit">Actualizar contraseña</button>
+            <button type="submit">Actualizar</button>
         </form>
         <div id="msgBox" class="msgBox"></div>
     </main>
@@ -51,42 +41,16 @@
 
     <script type="module">
         import { supabase } from "./config.js";
-
         const form = document.getElementById("confirmForm");
         const msg = document.getElementById("msgBox");
-        const pass1 = document.getElementById("newPassword");
-        const pass2 = document.getElementById("newPassword2");
-
-        // Ojitos 👁️
-        document.getElementById("toggleNewPass").addEventListener("click", () => {
-            pass1.type = pass1.type === "password" ? "text" : "password";
-        });
-        document.getElementById("toggleNewPass2").addEventListener("click", () => {
-            pass2.type = pass2.type === "password" ? "text" : "password";
-        });
-
-        // Guardar nueva contraseña
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
-            msg.textContent = "";
-
-            if (pass1.value !== pass2.value) {
-                msg.textContent = "⚠️ Las contraseñas no coinciden.";
-                return;
-            }
-
-            const { error } = await supabase.auth.updateUser({
-                password: pass1.value,
-            });
-
-            if (error) {
-                msg.textContent = "❌ " + error.message;
-            } else {
-                msg.textContent = "✅ Contraseña actualizada. Ahora puedes iniciar sesión.";
-                setTimeout(() => {
-                    window.location.href = "login.html";
-                }, 2000);
-            }
+            const pass1 = document.getElementById("newPassword").value;
+            const pass2 = document.getElementById("newPassword2").value;
+            if (pass1 !== pass2) return msg.textContent = "⚠️ Las contraseñas no coinciden.";
+            const { error } = await supabase.auth.updateUser({ password: pass1 });
+            msg.textContent = error ? "❌ " + error.message : "✅ Contraseña actualizada. Redirigiendo...";
+            if (!error) setTimeout(() => window.location.href = "login.html", 2000);
         });
     </script>
     <script type="module" src="header.js"></script>

@@ -3,23 +3,23 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Restablecer contraseña | Mi Galería</title>
+    <title>Restablecer contraseña | Mi App</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 </head>
 
 <body>
-<header>
-    <div class="logo">📸 Mi Galería</div>
-    <nav>
-        <ul>
-            <li><a href="index.html">Inicio</a></li>
-            <li><a href="login.html" id="loginNav">Login</a></li>
-            <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
-            <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
-        </ul>
-    </nav>
-</header>
+    <header>
+        <div class="logo">📸 Mi Galería</div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="login.html" id="loginNav">Login</a></li>
+                <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
+                <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
+            </ul>
+        </nav>
+    </header>
 
     <main class="auth-container">
         <h1>🔄 Restablecer contraseña</h1>
@@ -27,7 +27,7 @@
             <label>Correo
                 <input type="email" id="resetEmail" placeholder="ejemplo@mail.com" required>
             </label>
-            <button type="submit">Enviar enlace</button>
+            <button type="submit" id="resetBtn">Enviar enlace</button>
         </form>
         <div id="resetMsg" class="msgBox"></div>
     </main>
@@ -38,23 +38,16 @@
 
     <script type="module">
         import { supabase } from "./config.js";
-
         const form = document.getElementById("resetForm");
         const msg = document.getElementById("resetMsg");
-
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
+            msg.textContent = "⏳ Enviando...";
             const email = document.getElementById("resetEmail").value;
-
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: "https://my-repo-collection.github.io/mi-app/reset-confirm.html"
+                redirectTo: window.location.origin + "/reset-confirm.html"
             });
-
-            if (error) {
-                msg.textContent = "❌ " + error.message;
-            } else {
-                msg.textContent = "📩 Revisa tu correo para restablecer tu contraseña.";
-            }
+            msg.textContent = error ? "❌ " + error.message : "📧 Revisa tu correo.";
         });
     </script>
     <script type="module" src="header.js"></script>

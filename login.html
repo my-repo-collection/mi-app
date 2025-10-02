@@ -9,17 +9,17 @@
 </head>
 
 <body>
-<header>
-    <div class="logo">📸 Mi Galería</div>
-    <nav>
-        <ul>
-            <li><a href="index.html">Inicio</a></li>
-            <li><a href="login.html" id="loginNav">Login</a></li>
-            <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
-            <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
-        </ul>
-    </nav>
-</header>
+    <header>
+        <div class="logo">📸 Mi Galería</div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="login.html" id="loginNav">Login</a></li>
+                <li><a href="profile.html" id="profileNav" style="display:none;">Mi perfil</a></li>
+                <li><button id="logoutBtn" style="display:none;">🚪 Cerrar sesión</button></li>
+            </ul>
+        </nav>
+    </header>
 
     <main class="auth-container">
         <h1>🔑 Iniciar sesión</h1>
@@ -27,7 +27,6 @@
             <label>Correo
                 <input type="email" id="email" placeholder="ejemplo@mail.com" required>
             </label>
-
             <label>Contraseña
                 <div style="position:relative;">
                     <input type="password" id="password" placeholder="Tu contraseña" required>
@@ -35,17 +34,12 @@
                         style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">👁️</span>
                 </div>
             </label>
-
-            <button type="submit">Entrar</button>
+            <button type="submit" id="loginBtn">Entrar</button>
         </form>
 
         <div id="errorMsg" class="msgBox"></div>
-        <p class="help-text">
-            ¿No tienes cuenta? <a href="register.html">Regístrate</a>
-        </p>
-        <p class="help-text">
-            <a href="reset.html">¿Olvidaste tu contraseña?</a>
-        </p>
+        <p class="help-text">¿No tienes cuenta? <a href="register.html">Regístrate</a></p>
+        <p class="help-text"><a href="reset.html">¿Olvidaste tu contraseña?</a></p>
     </main>
 
     <footer>
@@ -53,15 +47,6 @@
     </footer>
 
     <script type="module" src="login.js"></script>
-    <script>
-        const togglePassLogin = document.getElementById("togglePassLogin");
-        const passLogin = document.getElementById("password");
-
-        togglePassLogin.addEventListener("click", () => {
-            passLogin.type = passLogin.type === "password" ? "text" : "password";
-        });
-    </script>
-    <script type="module" src="auth-redirect.js"></script>
     <script type="module" src="header.js"></script>
 </body>
 

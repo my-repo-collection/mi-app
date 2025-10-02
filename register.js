@@ -1,48 +1,40 @@
-// login.js
 import { supabase } from "./config.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("loginForm");
-  const errorMsg = document.getElementById("errorMsg");
+  const form = document.getElementById("registerForm");
+  const msg = document.getElementById("regMsg");
+  const pass1 = document.getElementById("regPass");
+  const pass2 = document.getElementById("regPass2");
+
+  document.getElementById("toggleRegPass").addEventListener("click", () => {
+    pass1.type = pass1.type === "password" ? "text" : "password";
+  });
+  document.getElementById("toggleRegPass2").addEventListener("click", () => {
+    pass2.type = pass2.type === "password" ? "text" : "password";
+  });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    errorMsg.textContent = "";
+    msg.textContent = "";
+    const btn = document.getElementById("registerBtn");
+    btn.disabled = true; btn.textContent = "⏳ Creando...";
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    if (pass1.value !== pass2.value) {
+      msg.textContent = "⚠️ Las contraseñas no coinciden";
+      btn.disabled = false; btn.textContent = "Registrarme";
+      return;
+    }
 
-    // 1. Intentar login
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await supabase.auth.signUp({
+      email, password: pass1.value
+    }, { emailRedirectTo: window.location.origin + "/profile.html" });
 
     if (error) {
-      console.error("Error en login:", error.message);
-      errorMsg.textContent = error.message;
-      return;
+      msg.textContent = "❌ " + error.message;
+    } else {
+      msg.textContent = "✅ Registro exitoso. Revisa tu email para confirmar.";
     }
-
-    const { user } = data;
-    console.log("🔑 Sesión iniciada:", user);
-
-    // 2. Buscar perfil en tabla usuarios
-    const { data: profile, error: profileError } = await supabase
-      .from("usuarios")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError) {
-      console.error("⚠️ Error cargando perfil:", profileError.message);
-      errorMsg.textContent = "Login correcto, pero no se pudo cargar perfil.";
-      return;
-    }
-
-    console.log("👤 Perfil cargado:", profile);
-
-    // 3. Redirigir al perfil
-    window.location.href = "profile.html";
+    btn.disabled = false; btn.textContent = "Registrarme";
   });
 });

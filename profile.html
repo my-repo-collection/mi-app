@@ -22,8 +22,10 @@
     </header>
 
     <main class="profile-container">
-        <!-- Tarjeta de perfil -->
         <section class="profile-card">
+            <div class="cover-box">
+                <img id="coverPreview" src="https://via.placeholder.com/900x200" alt="Portada">
+            </div>
             <div class="avatar-box">
                 <img id="avatarPreview" src="https://via.placeholder.com/120" alt="Avatar">
             </div>
@@ -31,25 +33,19 @@
             <p id="userEmail">correo@ejemplo.com</p>
             <p id="userBio">Sin biografía</p>
 
-            <!-- Botón compartir perfil -->
             <button id="shareProfileBtn" class="btn-secondary">🔗 Compartir perfil</button>
 
-            <!-- Acciones solo del dueño -->
             <div id="ownerActions" style="display:none;">
                 <button id="editToggleBtn" class="btn-primary">✏️ Editar perfil</button>
-
                 <form id="editProfileForm" class="edit-form" style="display:none;">
                     <input type="text" id="nameInput" placeholder="Nombre">
                     <textarea id="bioInput" rows="3" placeholder="Biografía"></textarea>
-                    <label>Foto de perfil:
-                        <input type="file" id="avatarInput" accept="image/*">
-                    </label>
+                    <label>Foto de perfil:<input type="file" id="avatarInput" accept="image/*"></label>
+                    <label>Portada:<input type="file" id="coverInput" accept="image/*"></label>
                     <button type="submit" class="btn-primary">💾 Guardar cambios</button>
                 </form>
 
                 <hr style="margin:20px 0;">
-
-                <!-- Subir nueva foto -->
                 <h3>📤 Subir nueva foto</h3>
                 <form id="uploadForm" class="upload-form">
                     <input type="file" id="imageInput" accept="image/*" required>
@@ -58,12 +54,9 @@
             </div>
         </section>
 
-        <!-- Galería -->
         <section class="gallery">
-            <h3>📷 Imágenes</h3>
-            <div id="galleryGrid" class="gallery-grid">
-                <!-- imágenes dinámicas -->
-            </div>
+            <h3>🖼️ Imágenes</h3>
+            <div id="galleryGrid" class="gallery-grid"></div>
         </section>
     </main>
 
@@ -71,7 +64,6 @@
         <p>© 2025 Mi Galería</p>
     </footer>
 
-    <!-- Scripts -->
     <script type="module" src="profile.js"></script>
     <script type="module" src="header.js"></script>
 </body>
