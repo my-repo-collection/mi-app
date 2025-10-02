@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
   const perfilIdParam = params.get("id");
 
-  // Get current user session
+  // --- Sesión actual
   const { data: sessionResp } = await supabase.auth.getUser();
   const user = sessionResp?.user ?? null;
   if (!user && !perfilIdParam) return (window.location.href = "login.html");
@@ -44,11 +44,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (avatarPreview) avatarPreview.src = currentProfile.avatar_url || "https://via.placeholder.com/120";
   if (coverPreview) coverPreview.src = currentProfile.cover_url || "https://via.placeholder.com/900x200";
 
-  // Mostrar/ocultar owner actions
+  // --- Acciones de dueño
   const ownerActions = document.getElementById("ownerActions");
   if (ownerActions) ownerActions.style.display = esDueno ? "block" : "none";
 
-  // Compartir (Web Share API)
+  // --- Compartir
   const shareBtn = document.getElementById("shareProfileBtn");
   if (shareBtn && navigator.share) {
     shareBtn.addEventListener("click", () => {
@@ -60,57 +60,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Lightbox helper
+  // --- Lightbox helper
   function createLightbox(url, filename = "") {
     if (document.getElementById("lightbox-overlay")) return;
     const overlay = document.createElement("div");
     overlay.id = "lightbox-overlay";
     overlay.className = "lightbox-overlay";
 
-    const content = document.createElement("div");
-    content.className = "lightbox-content";
+    overlay.innerHTML = `
+      <div class="lightbox-content">
+        <img class="lightbox-img" src="${url}" alt="${filename || "Imagen"}">
+        <div class="lightbox-actions">
+          <a href="${url}" download="${filename}" class="lightbox-download">⬇ Descargar</a>
+          <button id="copyUrlBtn">Copiar URL</button>
+          <button id="closeLightbox">Cerrar ✖</button>
+        </div>
+      </div>
+    `;
 
-    const img = document.createElement("img");
-    img.className = "lightbox-img";
-    img.src = url;
-    img.alt = filename || "Imagen";
-
-    const actions = document.createElement("div");
-    actions.className = "lightbox-actions";
-
-    const closeBtn = document.createElement("button");
-    closeBtn.textContent = "Cerrar";
-    closeBtn.onclick = () => overlay.remove();
-
-    const copyBtn = document.createElement("button");
-    copyBtn.textContent = "Copiar URL";
-    copyBtn.onclick = async () => {
-      try {
-        await navigator.clipboard.writeText(url);
-        copyBtn.textContent = "Copiado ✓";
-        setTimeout(() => (copyBtn.textContent = "Copiar URL"), 1500);
-      } catch {
-        copyBtn.textContent = "Error";
-      }
-    };
-
-    const downloadLink = document.createElement("a");
-    downloadLink.textContent = "Descargar";
-    downloadLink.href = url;
-    downloadLink.download = filename || "";
-    downloadLink.className = "lightbox-download";
-
-    actions.appendChild(downloadLink);
-    actions.appendChild(copyBtn);
-    actions.appendChild(closeBtn);
-
-    content.appendChild(img);
-    content.appendChild(actions);
-    overlay.appendChild(content);
     document.body.appendChild(overlay);
+
+    overlay.querySelector("#closeLightbox").onclick = () => overlay.remove();
+    overlay.querySelector("#copyUrlBtn").onclick = async () => {
+      await navigator.clipboard.writeText(url);
+      showToast("URL copiada ✅", "success");
+    };
   }
 
-  // --- Edit profile
+  // --- Editar perfil
   const editForm = document.getElementById("editProfileForm");
   if (esDueno && editForm) {
     document.getElementById("nameInput").value = currentProfile.name || "";
@@ -122,14 +99,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     editForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const newName = document.getElementById("nameInput").value.trim();
       const newBio = document.getElementById("bioInput").value.trim();
 
       let avatarUrl = currentProfile.avatar_url || null;
       let coverUrl = currentProfile.cover_url || null;
 
-      // Avatar upload
+      // --- Subir avatar
       try {
         const avatarFileRaw = document.getElementById("avatarInput")?.files?.[0];
         if (avatarFileRaw) {
@@ -147,7 +123,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      // Cover upload
+      // --- Subir portada
       try {
         const coverFileRaw = document.getElementById("coverInput")?.files?.[0];
         if (coverFileRaw) {
@@ -165,7 +141,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      // Save to DB
+      // --- Guardar en DB
       try {
         const { error: updateError } = await supabase
           .from("usuarios")
@@ -187,7 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // --- Gallery
+  // --- Galería
   async function refreshGallery() {
     const gallery = document.getElementById("galleryGrid");
     if (!gallery) return;
@@ -202,7 +178,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const { data: images, error } = await supabase
         .from("imagenes")
-        .select("*")
+        .select("id, url, name, titulo, created_at, fecha, descripcion, tema, path")
         .eq("user_id", idBuscado)
         .order("created_at", { ascending: false });
 
@@ -210,8 +186,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderGallery(images || []);
     } catch (err) {
       console.error("Error cargando galería:", err);
-      const gallery = document.getElementById("galleryGrid");
-      if (gallery) gallery.innerHTML = "<p>Error cargando galería.</p>";
+      gallery.innerHTML = "<p>Error cargando galería.</p>";
       showToast("Error cargando galería", "error");
     }
   }
@@ -225,33 +200,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     images.forEach((img) => {
+      const nombre = img.name || img.titulo || "Sin título";
+      const fecha = img.created_at || img.fecha;
+
       const card = document.createElement("div");
       card.className = "image-card";
 
       const imageEl = document.createElement("img");
       imageEl.src = img.url;
-      imageEl.alt = img.name || "foto";
+      imageEl.alt = nombre;
       imageEl.style.cursor = "pointer";
-      imageEl.addEventListener("click", () => createLightbox(img.url, img.name || ""));
+      imageEl.addEventListener("click", () => createLightbox(img.url, nombre));
 
       card.appendChild(imageEl);
 
+      // Acciones solo para dueño
       if (esDueno) {
         const actions = document.createElement("div");
         actions.className = "image-actions";
 
-        // Eliminar
+        // --- Eliminar
         const delBtn = document.createElement("button");
         delBtn.textContent = "🗑️ Eliminar";
         delBtn.onclick = async () => {
           if (!confirm("¿Eliminar esta imagen?")) return;
           try {
             if (img.path) {
-              const { error: rmErr } = await supabase.storage.from("imagenes").remove([img.path]);
-              if (rmErr) console.warn("Error borrando storage:", rmErr);
+              await supabase.storage.from("imagenes").remove([img.path]).catch(() => {});
             }
-            const { error: dbErr } = await supabase.from("imagenes").delete().eq("id", img.id);
-            if (dbErr) throw dbErr;
+            await supabase.from("imagenes").delete().eq("id", img.id);
             await refreshGallery();
             showToast("Imagen eliminada", "success");
           } catch (err) {
@@ -260,7 +237,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         };
 
-        // Reemplazar
+        // --- Reemplazar
         const repBtn = document.createElement("button");
         repBtn.textContent = "🔁 Reemplazar";
         repBtn.onclick = () => handleReplaceImage(img);
@@ -269,6 +246,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         actions.appendChild(repBtn);
         card.appendChild(actions);
       }
+
+      // Info adicional
+      const info = document.createElement("div");
+      info.className = "image-info";
+      info.innerHTML = `
+        <h4>${nombre}</h4>
+        <p>${img.descripcion || ""}</p>
+        <p>${fecha ? "📅 " + new Date(fecha).toLocaleDateString() : ""}</p>
+      `;
+      card.appendChild(info);
 
       gallery.appendChild(card);
     });
@@ -291,10 +278,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (uploadError) throw uploadError;
         const { data } = supabase.storage.from("imagenes").getPublicUrl(newPath);
         const publicUrl = data?.publicUrl;
-        // update DB row
-        const { error: updateError } = await supabase.from("imagenes").update({ url: publicUrl, path: newPath, name: file.name }).eq("id", imgRow.id);
-        if (updateError) throw updateError;
-        // optionally remove old storage file
+        await supabase.from("imagenes").update({ url: publicUrl, path: newPath, name: file.name }).eq("id", imgRow.id);
         if (imgRow.path) {
           await supabase.storage.from("imagenes").remove([imgRow.path]).catch(() => {});
         }
@@ -307,7 +291,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
   }
 
-  // Subir nueva imagen (owner)
+  // --- Subir nueva imagen
   if (esDueno) {
     const uploadForm = document.getElementById("uploadForm");
     uploadForm?.addEventListener("submit", async (e) => {
@@ -326,9 +310,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (uploadError) throw uploadError;
         const { data } = supabase.storage.from("imagenes").getPublicUrl(filePath);
         const publicUrl = data?.publicUrl;
-        // Insert into table 'imagenes'
-        const { error: insertError } = await supabase.from("imagenes").insert([{ user_id: user.id, url: publicUrl, path: filePath, name: file.name }]);
-        if (insertError) throw insertError;
+        await supabase.from("imagenes").insert([{ user_id: user.id, url: publicUrl, path: filePath, name: file.name }]);
         fileInput.value = "";
         await refreshGallery();
         showToast("Imagen subida", "success");
@@ -339,6 +321,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Inicial
+  // --- Inicial
   await refreshGallery();
 });

@@ -13,23 +13,25 @@ function renderGallery(imagenes) {
   }
 
   imagenes.forEach(img => {
+    const nombre = img.name || img.titulo || "Imagen sin título";
+    const fecha = img.created_at || img.fecha;
+
     const item = document.createElement("div");
     item.className = "bento-item";
     item.innerHTML = `
-      <img src="${img.url}" alt="${(img.name || 'Imagen').replace(/"/g,'')}" loading="lazy">
+      <img src="${img.url}" alt="${nombre.replace(/"/g,'')}" loading="lazy">
       <div class="info">
-        <h3>${img.name || "Imagen sin título"}</h3>
-        <p>📅 ${new Date(img.created_at).toLocaleDateString()}</p>
+        <h3>${nombre}</h3>
+        <p>📅 ${fecha ? new Date(fecha).toLocaleDateString() : ""}</p>
       </div>
     `;
 
     item.addEventListener("click", () => {
-      // lightbox
       const overlay = document.createElement("div");
       overlay.className = "lightbox-overlay";
       overlay.innerHTML = `
         <div class="lightbox-content">
-          <img class="lightbox-img" src="${img.url}" alt="${img.name || ''}">
+          <img class="lightbox-img" src="${img.url}" alt="${nombre}">
           <div class="lightbox-actions">
             <a class="lightbox-download" href="${img.url}" download>⬇ Descargar</a>
             <button id="closeLightbox">Cerrar ✖</button>
@@ -46,7 +48,6 @@ function renderGallery(imagenes) {
 
 async function loadImages() {
   galleryEl.innerHTML = "";
-  // skeletons
   for (let i = 0; i < 6; i++) {
     const sk = document.createElement("div");
     sk.className = "skeleton";
@@ -57,7 +58,7 @@ async function loadImages() {
   try {
     const { data, error } = await supabase
       .from("imagenes")
-      .select("id, url, name, created_at")
+      .select("id, url, name, titulo, created_at, fecha")
       .order("created_at", { ascending: false })
       .limit(6);
 
