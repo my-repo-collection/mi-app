@@ -1,170 +1,355 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Perfil | Mi Galería</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-  <script type="module" src="config.js"></script>
+    <meta charset="UTF-8">
+    <title>Perfil | Mi Galería</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    <script type="module" src="config.js"></script>
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+
+        .profile-info {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-info .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+        }
+
+        #editSection {
+            margin: 2rem 0;
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        #editForm label {
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        #editForm input,
+        #editForm textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        #editForm button {
+            background: #7c3aed;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        #editForm button:hover {
+            background: #6d28d9;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+
+        .gallery-item {
+            width: 100%;
+            border-radius: 8px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-card {
+            position: relative;
+        }
+
+        .image-actions {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .image-actions button {
+            background: #f3f4f6;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .image-actions button:hover {
+            background: #e5e7eb;
+        }
+    </style>
 </head>
+
 <body>
-  <header>
-    <div class="logo">📸 Mi Galería</div>
-    <nav>
-      <ul>
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="login.html" id="loginLink">Login</a></li>
-        <li><a href="profile.html" id="profileLink">Mi perfil</a></li>
-      </ul>
-    </nav>
-  </header>
+    <header>
+        <div class="logo">📸 Mi Galería</div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="login.html" id="loginLink">Login</a></li>
+                <li><a href="profile.html" id="profileLink">Mi perfil</a></li>
+            </ul>
+        </nav>
+    </header>
 
-  <main class="profile-container">
-    <h1>👤 Perfil</h1>
+    <main class="profile-container">
+        <h1>👤 Perfil</h1>
 
-    <!-- Perfil info -->
-    <div class="profile-info">
-      <img id="profileAvatar" src="" alt="Avatar" class="avatar">
-      <h2 id="profileName">Nombre</h2>
-      <p id="profileEmail">Email</p>
-      <p id="profileBio">Biografía</p>
-    </div>
+        <!-- Perfil info -->
+        <div class="profile-info">
+            <img id="profileAvatar" src="" alt="Avatar" class="avatar">
+            <h2 id="profileName">Nombre</h2>
+            <p id="profileEmail">Email</p>
+            <p id="profileBio">Biografía</p>
+        </div>
 
-    <!-- Formulario de edición SOLO para dueño -->
-    <div id="editSection" style="display:none;">
-      <h3>✏️ Editar perfil</h3>
-      <form id="editForm">
-        <label>Nombre:
-          <input type="text" id="editName">
-        </label>
-        <label>Biografía:
-          <textarea id="editBio"></textarea>
-        </label>
-        <label>Foto de perfil:
-          <input type="file" id="editAvatar" accept="image/*">
-        </label>
-        <button type="submit">Guardar cambios</button>
-      </form>
-      <div id="msgBox"></div>
-    </div>
+        <!-- Formulario de edición SOLO dueño -->
+        <div id="editSection" style="display:none;">
+            <h3>✏️ Editar perfil</h3>
+            <form id="editForm">
+                <label>Nombre:
+                    <input type="text" id="editName">
+                </label>
+                <label>Biografía:
+                    <textarea id="editBio"></textarea>
+                </label>
+                <label>Foto de perfil:
+                    <input type="file" id="editAvatar" accept="image/*">
+                </label>
+                <button type="submit">Guardar cambios</button>
+            </form>
+            <div id="msgBox"></div>
+        </div>
 
-    <!-- Galería -->
-    <h3>📷 Mis imágenes</h3>
-    <div id="gallery" class="gallery-grid"></div>
-  </main>
+        <!-- Subida de nuevas fotos SOLO dueño -->
+        <div id="uploadSection" style="display:none;">
+            <h3>📤 Subir nueva foto</h3>
+            <input type="file" id="newImage" accept="image/*">
+            <button id="uploadBtn">Subir</button>
+        </div>
 
-  <footer>
-    <p>© 2025 Mi Galería</p>
-  </footer>
+        <!-- Galería -->
+        <h3>📷 Mis imágenes</h3>
+        <div id="gallery" class="gallery-grid"></div>
+    </main>
 
-  <script type="module">
-    import { supabase } from "./config.js";
+    <footer>
+        <p>© 2025 Mi Galería</p>
+    </footer>
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      // 1. Usuario autenticado
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        window.location.href = "login.html";
-        return;
-      }
+    <script type="module">
+        import { supabase } from "./config.js";
 
-      // ¿Se visita otro perfil? Ej: profile.html?id=xxxx
-      const params = new URLSearchParams(window.location.search);
-      const profileId = params.get("id") || user.id; // si no hay id, mostrar el mío
+        document.addEventListener("DOMContentLoaded", async () => {
+            // 1. Usuario autenticado
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                window.location.href = "login.html";
+                return;
+            }
 
-      // 2. Cargar perfil
-      const { data: profile, error } = await supabase
-        .from("usuarios")
-        .select("*")
-        .eq("id", profileId)
-        .single();
+            // Ver perfil propio u otro
+            const params = new URLSearchParams(window.location.search);
+            const profileId = params.get("id") || user.id;
 
-      if (error) {
-        console.error("❌ Error cargando perfil:", error.message);
-        return;
-      }
+            // 2. Cargar perfil
+            const { data: profile, error } = await supabase
+                .from("usuarios")
+                .select("*")
+                .eq("id", profileId)
+                .single();
 
-      // Pintar perfil
-      document.getElementById("profileEmail").textContent = profile.email;
-      document.getElementById("profileName").textContent = profile.name || "Sin nombre";
-      document.getElementById("profileBio").textContent = profile.bio || "Sin biografía";
-      if (profile.avatar_url) {
-        document.getElementById("profileAvatar").src = profile.avatar_url;
-      } else {
-        document.getElementById("profileAvatar").src = "default-avatar.png";
-      }
+            if (error) {
+                console.error("❌ Error cargando perfil:", error.message);
+                return;
+            }
 
-      // 3. Mostrar edición solo si es mi perfil
-      if (profileId === user.id) {
-        document.getElementById("editSection").style.display = "block";
-        document.getElementById("editName").value = profile.name || "";
-        document.getElementById("editBio").value = profile.bio || "";
-      }
+            // Pintar perfil
+            document.getElementById("profileEmail").textContent = profile.email;
+            document.getElementById("profileName").textContent = profile.name || "Sin nombre";
+            document.getElementById("profileBio").textContent = profile.bio || "Sin biografía";
+            document.getElementById("profileAvatar").src = profile.avatar_url || "default-avatar.png";
 
-      // 4. Guardar cambios
-      const form = document.getElementById("editForm");
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const name = document.getElementById("editName").value.trim();
-        const bio = document.getElementById("editBio").value.trim();
-        const file = document.getElementById("editAvatar").files[0];
+            // 3. Mostrar edición solo si es mi perfil
+            if (profileId === user.id) {
+                document.getElementById("editSection").style.display = "block";
+                document.getElementById("uploadSection").style.display = "block";
 
-        let avatarUrl = profile.avatar_url;
+                document.getElementById("editName").value = profile.name || "";
+                document.getElementById("editBio").value = profile.bio || "";
+            }
 
-        // subir nueva imagen si hay
-        if (file) {
-          const filePath = `${user.id}/${Date.now()}-${file.name}`;
-          const { error: uploadError } = await supabase.storage
-            .from("avatars")
-            .upload(filePath, file, { upsert: true });
-          if (uploadError) {
-            alert("Error subiendo imagen: " + uploadError.message);
-            return;
-          }
-          const { data: publicUrl } = supabase.storage
-            .from("avatars")
-            .getPublicUrl(filePath);
-          avatarUrl = publicUrl.publicUrl;
-        }
+            // 4. Guardar cambios de perfil
+            const form = document.getElementById("editForm");
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const name = document.getElementById("editName").value.trim();
+                const bio = document.getElementById("editBio").value.trim();
+                const file = document.getElementById("editAvatar").files[0];
 
-        // actualizar perfil
-        const { error: updateError } = await supabase
-          .from("usuarios")
-          .update({ name, bio, avatar_url: avatarUrl })
-          .eq("id", user.id);
+                let avatarUrl = profile.avatar_url;
 
-        if (updateError) {
-          document.getElementById("msgBox").textContent = "❌ Error guardando cambios";
-        } else {
-          document.getElementById("msgBox").textContent = "✅ Cambios guardados";
-          location.reload();
-        }
-      });
+                if (file) {
+                    const filePath = `${user.id}/avatar-${Date.now()}-${file.name}`;
+                    const { error: uploadError } = await supabase.storage
+                        .from("avatars")
+                        .upload(filePath, file, { upsert: true });
+                    if (uploadError) {
+                        alert("Error subiendo imagen: " + uploadError.message);
+                        return;
+                    }
+                    const { data: publicUrl } = supabase.storage
+                        .from("avatars")
+                        .getPublicUrl(filePath);
+                    avatarUrl = publicUrl.publicUrl;
+                }
 
-      // 5. Galería de imágenes
-      const { data: images, error: galleryError } = await supabase
-        .from("imagenes")
-        .select("*")
-        .eq("user_id", profileId)
-        .order("created_at", { ascending: false });
+                const { error: updateError } = await supabase
+                    .from("usuarios")
+                    .update({ name, bio, avatar_url: avatarUrl })
+                    .eq("id", user.id);
 
-      if (galleryError) {
-        console.error("❌ Error cargando galería:", galleryError.message);
-      } else {
-        const galleryDiv = document.getElementById("gallery");
-        if (images.length === 0) {
-          galleryDiv.innerHTML = "<p>Sin imágenes todavía.</p>";
-        } else {
-          images.forEach(img => {
-            const el = document.createElement("img");
-            el.src = img.url;
-            el.alt = img.titulo || "foto";
-            el.classList.add("gallery-item");
-            galleryDiv.appendChild(el);
-          });
-        }
-      }
-    });
-  </script>
+                document.getElementById("msgBox").textContent = updateError
+                    ? "❌ Error guardando cambios"
+                    : "✅ Cambios guardados";
+
+                if (!updateError) location.reload();
+            });
+
+            // 5. Subir nueva foto
+            const uploadBtn = document.getElementById("uploadBtn");
+            uploadBtn.addEventListener("click", async () => {
+                const file = document.getElementById("newImage").files[0];
+                if (!file) return alert("Selecciona una imagen");
+
+                const filePath = `${user.id}/${Date.now()}-${file.name}`;
+                const { error: uploadError } = await supabase.storage
+                    .from("imagenes")
+                    .upload(filePath, file, { upsert: true });
+
+                if (uploadError) {
+                    alert("Error subiendo: " + uploadError.message);
+                    return;
+                }
+
+                const { data: publicUrl } = supabase.storage
+                    .from("imagenes")
+                    .getPublicUrl(filePath);
+
+                await supabase.from("imagenes").insert([
+                    { user_id: user.id, url: publicUrl.publicUrl }
+                ]);
+
+                location.reload();
+            });
+
+            // 6. Galería
+            const { data: images, error: galleryError } = await supabase
+                .from("imagenes")
+                .select("*")
+                .eq("user_id", profileId)
+                .order("created_at", { ascending: false });
+
+            const galleryDiv = document.getElementById("gallery");
+
+            if (galleryError) {
+                console.error("❌ Error cargando galería:", galleryError.message);
+            } else if (!images || images.length === 0) {
+                galleryDiv.innerHTML = "<p>Sin imágenes todavía.</p>";
+            } else {
+                images.forEach(img => {
+                    const card = document.createElement("div");
+                    card.classList.add("image-card");
+
+                    const el = document.createElement("img");
+                    el.src = img.url;
+                    el.alt = img.titulo || "foto";
+                    el.classList.add("gallery-item");
+                    card.appendChild(el);
+
+                    // Solo dueño puede borrar/reemplazar
+                    if (profileId === user.id) {
+                        const actions = document.createElement("div");
+                        actions.classList.add("image-actions");
+
+                        // Botón eliminar
+                        const btnDelete = document.createElement("button");
+                        btnDelete.textContent = "🗑 Eliminar";
+                        btnDelete.onclick = async () => {
+                            if (!confirm("¿Seguro que quieres eliminar esta imagen?")) return;
+
+                            const path = img.url.split("/").pop();
+                            await supabase.storage.from("imagenes").remove([`${user.id}/${path}`]);
+                            await supabase.from("imagenes").delete().eq("id", img.id);
+
+                            location.reload();
+                        };
+                        actions.appendChild(btnDelete);
+
+                        // Botón reemplazar
+                        const btnReplace = document.createElement("button");
+                        btnReplace.textContent = "🔄 Reemplazar";
+                        btnReplace.onclick = async () => {
+                            const input = document.createElement("input");
+                            input.type = "file";
+                            input.accept = "image/*";
+                            input.click();
+
+                            input.onchange = async () => {
+                                const file = input.files[0];
+                                if (!file) return;
+
+                                const filePath = `${user.id}/${Date.now()}-${file.name}`;
+                                const { error: uploadError } = await supabase.storage
+                                    .from("imagenes")
+                                    .upload(filePath, file, { upsert: true });
+
+                                if (uploadError) {
+                                    alert("Error subiendo: " + uploadError.message);
+                                    return;
+                                }
+
+                                const { data: publicUrl } = supabase.storage
+                                    .from("imagenes")
+                                    .getPublicUrl(filePath);
+
+                                await supabase.from("imagenes")
+                                    .update({ url: publicUrl.publicUrl })
+                                    .eq("id", img.id);
+
+                                location.reload();
+                            };
+                        };
+                        actions.appendChild(btnReplace);
+
+                        card.appendChild(actions);
+                    }
+
+                    galleryDiv.appendChild(card);
+                });
+            }
+        });
+    </script>
 </body>
+
 </html>

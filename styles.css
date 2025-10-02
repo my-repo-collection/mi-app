@@ -446,3 +446,93 @@ footer a:hover {
     transform: scale(1.05);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
+
+.profile-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1rem;
+}
+
+.profile-info {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.profile-info .avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+}
+
+#editSection {
+    margin: 2rem 0;
+    background: #f9fafb;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+#editForm label {
+    display: block;
+    margin: 0.5rem 0;
+}
+
+#editForm input,
+#editForm textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+#editForm button {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+#editForm button:hover {
+    background: #6d28d9;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+}
+
+.gallery-item {
+    width: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+    display: block;
+}
+
+.image-card {
+    position: relative;
+}
+
+.image-actions {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.image-actions button {
+    background: #f3f4f6;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.image-actions button:hover {
+    background: #e5e7eb;
+}
