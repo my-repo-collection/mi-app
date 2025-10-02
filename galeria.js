@@ -9,16 +9,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   const galleryDesc = document.getElementById("gallery-desc");
   const logoutBtn = document.getElementById("logout");
 
-  // Detectar usuario en URL
+  // Detectar usuario en URL (?user=...)
   const urlParams = new URLSearchParams(window.location.search);
   const viewedUserId = urlParams.get("user");
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) window.location.href = "login.html";
+  // Usuario logueado
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError) {
+    console.error("Error al obtener usuario:", userError.message);
+    window.location.href = "login.html";
+    return;
+  }
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
 
   const isOwner = !viewedUserId || viewedUserId === user.id;
   const userId = viewedUserId || user.id;
 
+  // Texto y botones según dueño o público
   if (isOwner) {
     galleryDesc.textContent = "Aquí puedes ver y subir tus imágenes.";
     uploadSection.style.display = "block";
@@ -28,18 +38,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     logoutBtn.style.display = "none";
   }
 
-  // Cargar imágenes
+  // ------------------- Cargar imágenes -------------------
   async function loadImages() {
     galleryList.innerHTML = "<p>Cargando imágenes...</p>";
 
     const { data, error } = await supabase
       .from("imagenes")
-      .select("url, name")
+      .select("url, name, created_at")
       .eq("user_id", userId)
-      .order("id", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (error) {
-      console.error(error);
+      console.error("Error al cargar imágenes:", error.message);
       galleryList.innerHTML = "<p>Error al cargar imágenes.</p>";
       return;
     }
@@ -53,13 +63,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     data.forEach(img => {
       const el = document.createElement("img");
       el.src = img.url;
-      el.alt = img.name;
+      el.alt = img.name || "Imagen subida";
       galleryList.appendChild(el);
     });
   }
   loadImages();
 
-  // Subir imágenes (solo dueño)
+  // ------------------- Subir imágenes (solo dueño) -------------------
   if (isOwner) {
     uploadBtn.addEventListener("click", () => imageInput.click());
 
@@ -67,31 +77,42 @@ document.addEventListener("DOMContentLoaded", async () => {
       const file = e.target.files[0];
       if (!file) return;
 
-      const fileName = `img-${Date.now()}-${file.name}`;
+      const fileName = `img-${user.id}-${Date.now()}-${file.name}`;
       const { error: uploadError } = await supabase.storage
         .from("imagenes")
-        .upload(fileName, file);
+        .upload(fileName, file, { upsert: true });
 
       if (uploadError) {
         alert("Error al subir imagen: " + uploadError.message);
         return;
       }
 
-      const { data: signedData } = await supabase.storage
+      // URL pública
+      const { data: publicUrlData } = supabase
+        .storage
         .from("imagenes")
-        .createSignedUrl(fileName, 3600);
+        .getPublicUrl(fileName);
 
-      if (!signedData?.signedUrl) return;
+      if (!publicUrlData?.publicUrl) {
+        alert("Error al obtener URL pública de la imagen");
+        return;
+      }
 
-      await supabase.from("imagenes").insert({
+      // Guardar en tabla
+      const { error: insertError } = await supabase.from("imagenes").insert({
         user_id: user.id,
-        url: signedData.signedUrl,
+        url: publicUrlData.publicUrl,
         name: file.name
       });
+
+      if (insertError) {
+        console.error("Error insertando en DB:", insertError.message);
+      }
 
       loadImages();
     });
 
+    // Logout
     logoutBtn.addEventListener("click", async () => {
       await supabase.auth.signOut();
       window.location.href = "login.html";
