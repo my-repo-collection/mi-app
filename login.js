@@ -1,3 +1,4 @@
+// login.js
 import { supabase } from "./config.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -23,35 +24,23 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const user = data.user;
-    if (!user) {
-      errorMsg.textContent = "No se pudo iniciar sesión.";
-      return;
-    }
+    const { user } = data;
+    console.log("🔑 Sesión iniciada:", user);
 
-    // 2. Verificar si ya existe perfil en 'usuarios'
-    const { data: existingProfile, error: profileError } = await supabase
+    // 2. Buscar perfil en tabla usuarios
+    const { data: profile, error: profileError } = await supabase
       .from("usuarios")
-      .select("id")
+      .select("*")
       .eq("id", user.id)
       .single();
 
-    // Si no hay perfil, crearlo automáticamente
-    if (!existingProfile) {
-      const { error: insertError } = await supabase.from("usuarios").insert({
-        id: user.id,
-        email: user.email,
-        name: null,
-        avatar_url: null,
-        bio: null,
-      });
-
-      if (insertError) {
-        console.error("Error creando perfil en login:", insertError.message);
-        // No bloquea acceso, pero lo mostramos en pantalla
-        errorMsg.textContent = "Accediste pero no se pudo crear el perfil automáticamente.";
-      }
+    if (profileError) {
+      console.error("⚠️ Error cargando perfil:", profileError.message);
+      errorMsg.textContent = "Login correcto, pero no se pudo cargar perfil.";
+      return;
     }
+
+    console.log("👤 Perfil cargado:", profile);
 
     // 3. Redirigir al perfil
     window.location.href = "profile.html";

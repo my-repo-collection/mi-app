@@ -1,15 +1,23 @@
+// register.js
 import { supabase } from "./config.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("registerForm");
-  const errorMsg = document.getElementById("errorMsg");
+  const msgBox = document.getElementById("msgBox");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    errorMsg.textContent = "";
+    msgBox.textContent = "";
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
+    const email = document.getElementById("registerEmail").value.trim();
+    const password = document.getElementById("registerPassword").value.trim();
+    const confirmPassword = document.getElementById("registerConfirm").value.trim();
+
+    if (password !== confirmPassword) {
+      msgBox.textContent = "❌ Las contraseñas no coinciden.";
+      msgBox.style.color = "red";
+      return;
+    }
 
     // 1. Crear usuario en auth
     const { data, error } = await supabase.auth.signUp({
@@ -18,33 +26,33 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (error) {
-      console.error("Error en signUp:", error.message);
-      errorMsg.textContent = error.message;
+      console.error("❌ Error registrando:", error.message);
+      msgBox.textContent = "Error: " + error.message;
+      msgBox.style.color = "red";
       return;
     }
 
     const user = data.user;
-    if (!user) {
-      errorMsg.textContent = "No se pudo registrar el usuario.";
-      return;
-    }
+    console.log("🔑 Nuevo usuario:", user);
 
-    // 2. Insertar perfil en la tabla usuarios
-    const { error: insertError } = await supabase.from("usuarios").insert({
-      id: user.id,          // 👈 usar mismo ID que auth.users
-      email: user.email,
-      name: null,
-      avatar_url: null,
-      bio: null
-    });
+    // 2. Crear perfil en tabla usuarios
+    const { error: insertError } = await supabase.from("usuarios").insert([
+      {
+        id: user.id,       // 👈 tiene que coincidir con auth.uid()
+        email: user.email,
+        name: "",
+        avatar_url: "",
+        bio: ""
+      }
+    ]);
 
     if (insertError) {
-      console.error("Error insertando en usuarios:", insertError.message);
-      errorMsg.textContent = "Error creando el perfil: " + insertError.message;
-      return;
+      console.error("⚠️ Error insertando perfil:", insertError.message);
+      msgBox.textContent = "Cuenta creada, pero error al guardar perfil.";
+      msgBox.style.color = "orange";
+    } else {
+      msgBox.textContent = "✅ Cuenta creada. Revisa tu correo para confirmar.";
+      msgBox.style.color = "green";
     }
-
-    // 3. Redirigir al perfil
-    window.location.href = "profile.html";
   });
 });
